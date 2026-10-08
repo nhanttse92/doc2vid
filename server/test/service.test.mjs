@@ -252,9 +252,12 @@ test('follow-up busy, answer only, and edited rerender', async t => {
   e.unblock();
   await e.waitStatus(id, 'done');
   const renders = e.calls.filter(call => call.name === 'render.mjs').length;
+  const sceneAgents = e.agentCalls.filter(call => call.role === 'scene').length;
   assert.equal((await e.request(`/jobs/${id}/messages`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: 'Change it' }) })).status, 202);
   await e.waitStatus(id, 'done');
   assert.ok(e.calls.filter(call => call.name === 'render.mjs').length > renders);
+  // The revise agent's edit renders cleanly, so no scene agent should be started to redo it.
+  assert.equal(e.agentCalls.filter(call => call.role === 'scene').length, sceneAgents);
 });
 
 test('answer-only follow-up does not rerun scripts', async t => {

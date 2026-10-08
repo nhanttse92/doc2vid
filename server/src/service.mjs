@@ -559,7 +559,32 @@ export class JobService {
     const vars = { scene_id: scene.id, scene_title: scene.title || scene.id, beat_ids: scene.beats?.map(b => b.id).join(',') || '', scene_seconds: timed?.duration ?? '' };
     let sessionId, lastError;
     const changed = !revision || job.changedScenes?.includes(scene.id);
-    if (changed) {
+    if (revision) {
+      // The revise agent already made the owner's change; a fresh scene agent would redo the scene
+      // from its prompt and could undo that edit. Check and render it, and only bring in a scene
+      // agent to repair a check or render failure.
+      for (let attempt = 0; attempt <= 2; attempt++) {
+        throwIfAborted(signal);
+        try {
+          if (attempt > 0) {
+            state.state = 'writing'; await this.persist(job);
+            const prompt = await this.prompt(job, 'repair-scene.md', { scene_id: scene.id, error: lastError });
+            const result = await this.agent(job, 'scene', prompt, signal, { scene: scene.id, resume: sessionId });
+            sessionId = result.sessionId || sessionId;
+            if (result.isError) throw new Error(result.error || 'Scene agent failed');
+          }
+          state.state = 'rendering'; await this.persist(job);
+          if (changed || attempt > 0) await this.cmd(job, 'scenes', 'node', ['nancheck.mjs', scene.id], signal);
+          await renderGate.use(() => this.cmd(job, 'scenes', 'node', ['render.mjs', scene.id], signal, { jobs: 1 }));
+          state.state = 'done'; await this.persist(job);
+          return;
+        } catch (error) {
+          throwIfAborted(signal);
+          lastError = error.message.split('\n').slice(-40).join('\n');
+          if (attempt < 2) await this.emit(job, { type: 'error', stage: 'scenes', message: `${scene.id}: ${this.redact(lastError)}` });
+        }
+      }
+    } else if (changed) {
       for (let attempt = 0; attempt <= 2; attempt++) {
         throwIfAborted(signal);
         state.state = 'writing'; await this.persist(job);
@@ -578,13 +603,6 @@ export class JobService {
           if (attempt < 2) await this.emit(job, { type: 'error', stage: 'scenes', message: `${scene.id}: ${this.redact(lastError)}` });
         }
       }
-    } else {
-      try {
-        state.state = 'rendering'; await this.persist(job);
-        await renderGate.use(() => this.cmd(job, 'scenes', 'node', ['render.mjs', scene.id], signal, { jobs: 1 }));
-        state.state = 'done'; await this.persist(job);
-        return;
-      } catch (error) { lastError = error.message; }
     }
     await this.emit(job, { type: 'error', stage: 'scenes', message: `${scene.id}: ${this.redact(lastError || 'Scene failed')}; using fallback` });
     state.state = 'fallback'; await this.persist(job);
