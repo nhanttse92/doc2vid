@@ -23,14 +23,20 @@ from xml.sax.saxutils import escape
 root = Path(os.environ['DOC2VID_INSTALL_ROOT'])
 node = os.environ['DOC2VID_INSTALL_NODE']
 home = str(Path.home())
-for name in ('com.albinilabs.doc2vid.plist', 'com.albinilabs.doc2vid-awake.plist'):
+names = ['com.albinilabs.doc2vid.plist', 'com.albinilabs.doc2vid-awake.plist']
+# The tunnel only runs once its token has been placed (it is created in the Cloudflare account, not here).
+if (Path.home() / '.config' / 'doc2vid' / 'tunnel-token').exists():
+    names.append('com.albinilabs.doc2vid-tunnel.plist')
+for name in names:
     source = (root / 'deploy' / name).read_text()
     for key, value in {'@NODE@': node, '@SERVER@': str(root / 'server'), '@HOME@': home}.items():
         source = source.replace(key, escape(value))
     (Path.home() / 'Library' / 'LaunchAgents' / name).write_text(source)
 PY
 DOMAIN="gui/$(id -u)"
-for label in com.albinilabs.doc2vid com.albinilabs.doc2vid-awake; do
+labels='com.albinilabs.doc2vid com.albinilabs.doc2vid-awake'
+if [ -f "$HOME/.config/doc2vid/tunnel-token" ]; then labels="$labels com.albinilabs.doc2vid-tunnel"; fi
+for label in $labels; do
   plist="$HOME/Library/LaunchAgents/$label.plist"
   launchctl bootout "$DOMAIN/$label" >/dev/null 2>&1 || true
   launchctl bootstrap "$DOMAIN" "$plist"
