@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "title": "Mini training",
+    "target_seconds": 120,
+    "words_per_minute": 140,
+    "voice": "Charon",
+    "persona": "A clear, friendly workplace trainer."
+  },
+  "music": [],
+  "scenes": [
+    {
+      "id": "s01",
+      "title": "First",
+      "beats": [
+        { "id": "s01b01", "narration": "Learn the first step.", "hold_seconds": 1 }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "Second",
+      "beats": [
+        { "id": "s02b01", "narration": "Learn the second step.", "hold_seconds": 1 }
+      ]
+    }
+  ]
+}
