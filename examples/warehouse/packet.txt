@@ -1,0 +1,700 @@
+      Company Logo
+
+
+
+
+WAREHOUSE TRAINING PACKET
+
+
+
+
+                            1/21
+                                                     Contents
+
+
+
+                         Warehouse Training Packet
+                               Table of Contents
+
+Part I: Purpose
+
+1. Purpose of Warehouse Training Packet
+2. Summary: Common Errors and Preventions
+
+
+Part II: Receiving. Storing. Shipping
+3. Receiving of Freight
+4. Packaging of Parts
+5.    Storing of Parts
+6. Warehouse Location System
+7. Mezzanine Storage
+8. Packing and Shipping
+
+Part Ill: Ordering, Returns
+
+9. Stock Order Processing
+10. Order Filling
+11. Parts Returns
+
+Part IV: Inventory Counts
+12. Inventory Counts
+
+Part V: Maintenance
+     . Warehouse Housekeepir
+
+  1. Personal In rovement Maintenan
+Part VI: Safety
+
+16. Warehouse Safety
+17. General Safety Practices
+
+Attachments: (copies of policies and procedures)
+
+
+
+
+                                                         2/21
+                                                                                    Part I: Purpose
+
+
+                         1. Purpose of Warehouse Training Packet
+
+Purpose: The role of the warehouse personnel has a direct impact on several key elements of
+             business:
+
+
+   • Assist in managing one of the largest assets of              spare parts inventory.The task
+       we perform, and the accuracy of all that we do, contributes to the credibility of the parts
+       inventory.
+   • Providing exceptional customer service through timely, and accurately, perform the
+       various warehouse responsibilities. Our customers rely on the availability our spare parts
+       to keep their machines operating. The accuracy of our inventory builds confidence in our
+       ability to serve our customers.
+   • Efficiency within the company is gained through everyone doing their area of
+       responsibilities accurately and timely.
+   •
+
+ Therefore this training packet has been prepared to assist you in gaining some of the skills needed
+to perform your warehouse responsibilities. This document cannot cover all the various tasks, so
+ please don't hesitate to visit with your supervisor regarding any question that may arise.
+
+
+                           2. Common Errors and Preventions
+
+Common errors involving warehouse operations typically are related too:
+
+   • Timely process of documentation- Parts inventory management requires the timely
+       processing all activities related to storing, stocking, shipping, counting of the inventory,
+       and processing of the documentation.
+   • To avoid the common errors it is important to understand the impact the task has on
+        managing the parts inventory, follow the required instructions, and ask for assistance for
+       those areas that you are not familiar in handling.
+
+
+
+
+                                                                                               3/21
+                                                             Part I: Receiving, Storing, Shipping
+
+
+                                  3. Receiving of Freight
+
+ Receiving of freight is the beginning point of spare parts inventory management. The following
+information is critical to the processing of incoming freight:
+
+• Incoming freight is to be unloaded and inspected for damages and shortages before signing
+    the manifest. Any damages should be noted on the manifest. The proper procedure for filing
+    a freight claim should be followed based on the carrier's guidelines. Timeliness and proper
+    documentation is critical to assist in processing the claim. Taking of photos can be very
+    helpful in noting and settling of claims.
+
+• Instructions and communication with the delivery drivers that all trucks need to have wheels
+    chocked for safety. NO EXCEPTION
+
+• Freight is to be put in the designated area for sorting between stock and emergency orders.
+
+• Stock orders are checked and put in proper locations within 24 hours after receiving.
+• Emergency orders are to be checked in 2 hours after receiving for customers and shop orders
+    that are pending. Freight charges are then determined and added to shop and customer orders.
+
+• Paperwork is given to Inventory Analyst to input in the computer system to update the
+    inventory on hands.
+
+ The proper packing slips for Emergency orders to be shipped to the shop, and custom
+      estinations, are printed and attached to the shipmer
+
+• Daily all incoming and outgoing paperwork is to be filed in the appropriate folders for future
+    reference.
+
+• Air shipments consists of the following: UPS and FEDEX
+
+
+• Shipments arito us bedone ando end to the are granites received with the
+
+
+
+
+                                                                                            4/21
+                                                           Part II: Receiving, Storing. Shipping
+
+                                  4. Packaging of Parts
+It is important to use caution while handling parts with various types of packaging. Therefore
+caution must be used to properly identify the various types of packaging and the proper method
+of handling each.
+
+• Multiple packaged parts- Parts that are a greater number than 1 in package. For example a
+     package includes a quantity of 10, but sold as individual units
+• Parts packed in sets- Parts that consist of two or more identical pieces that make QTY 1 se
+    For example 2 brake shoes make one set.
+• Parts packed in kits-Consists of multiple parts and quantities to make 1 kit. For example, 1
+    cylinder seal kit consists of several parts to create the kit:
+
+                     Seal bearings
+
+                     Seals
+                     Oil bearings
+
+All these parts are used to reseal/rebuild one hydraulic cylinder.
+
+Prevent improper stocking of parts by:
+
+• Never overstock parts in a location. If the location is not large enough, re-locate the parts to a
+    location that will accommodate the additional inventory.
+• Use caution when placing parts on the shelf as to the proper part number, quantity, and
+    package quantity. This will assist in maintaining inventory accuracy, and speed up the order
+    filling process.
+
+
+
+
+                                                                                              5/21
+                                                             Part I: Receiving, Storing. Shipping
+
+
+                                        5. Storing of Parts
+
+Storage space in a warehouse is in most cases limited, and the most efficient use of space is
+critical.
+
+
+• Stacked cartons should plainly display the part number. This will allow for quicker filling of
+    the order and support an order free of pulling errors.
+• Avoid stocking of multiple parts in the same location. When this occurs make sure the parts
+    are dissimilar to assist in avoiding a pulling error.
+• Each bin location should be clearly marked with the correct part number. Bin labels that have
+    become damage, partially missing, or worn should be replaced.
+• When storing parts outside make sure the carton is weather proof to the level to protect the
+    parts inside the carton. Moisture due condensation can cause rust and damage to parts stored
+    inside closed crates, or cartons.
+
+The following information applies to the proper stocking of parts:
+
+
+
+
+     are utilized before pulling from the permanent location.
+
+
+
+
+    in package quantity.
+
+Prevent improper stocking of parts by:
+
+• Never overstock parts in a location. If the
+    location is not large enough, have the
+    location changed.
+ • Never overload wire baskets or shelves
+ • Make sure the part number and descriptior
+    match the part being stocked.
+• Do not remove the protective packaging
+     material from parts being protected from
+    rusting, dirt, and weather conditions.
+• Parts with machine surfaces should be stored
+    and handled in a manner that protects the
+    surfaces from damage.
+
+
+
+
+                                                                                                6/21
+                                                           Part I: Receiving, Storing, Shipping
+
+
+                             6. Warehouse Location System
+
+Each warehouse has a layout based on the type and size of parts being inventoried. Each new
+employee will become familiar with the proper layout of the warehouse and assist in the proper
+stocking of parts that will support location system that is in place.
+
+To assist in becoming familiar with the location system:
+   • All aisle should be properly marked and easy to identify
+   • Sections within a row should be clearly marked to assist in determining the proper
+      location.
+
+Any questions regarding the proper stocking of parts need to be referred to the Parts/Warehouse
+Supervisor.
+
+
+
+
+                                                                                           7/21
+                                                         Part I: Receiving, Storing, Shipping
+
+
+                                   7. Mezzanine Storage
+
+The use of mezzanine storage will be intended for lighter, slower moving inventory, or for
+storage of supplies, packing and carton storage.
+
+• The cleanliness of the mezzanine areas will be maintained to the same high stands as the
+    main warehouse. All shelves will be free of dust and organized in accordance with the other
+    warehouse standards and practice.
+• All weight limitations will be clearly marked and followed based the limitations that are
+    identified.
+
+
+
+
+                                                                                              8/21
+                                                           Part I: Receiving, Storing, Shipping
+
+
+                                  8. Packing and Shipping
+
+Our professionalism is evident to our customers in many ways, one is the appearance of how we
+package and ship parts. If the customer doesn't receive all the parts they ordered, or the order is
+incorrect, the image of           can be negatively impacted.
+
+• Each part will be plainly marked or tagged that identifies the part number and quantity being
+
+• Clean boxes and packaging will be used for parts shipped to our customers. We will display
+   a high level of quality and professionalism in all shipments.
+• Cut off times for the various shippers must be known to insure timely order processing and
+    meeting the shipping cut off times.
+• Do not over pack a carton in a manner that can cause a safety hazard, or makes difficult for
+    the customer to handle the package. Each individual has different limitations on what can
+    lifted and carried. In general the weight of any one carton should not exceed 50 pounds.
+    This can vary based on the size, shape, and demission on the part.
+
+
+
+
+                                                                                               9/21
+                                                                       Part I!!: Ordering, Returns
+
+
+                                 9. Stock Order Processing
+
+Processing of the stock orders is a critical step in providing the proper parts at the proper time to
+the customer. The goal is to have all stock ordered received to be on the shelf and the on hands
+current within 8 hours after receipt.
+
+The following picture is of a vendor's pick tag:
+
+Warehouse Responsibilities:
+• Location- Bin location the part is to be placed. It may help to expedite the complete stock
+    order by sorting the parts by bin location prior to putting stock on the shelf.
+• Part Number- This number represents the vendor's part number, and it should be verified
+    against other parts on the shelf and the bin tag associated with the bin location.
+• Pick Oty- Represents the number of pieces associated with the part number for a specific
+    stock order. This quantity should be verified with the parts received on the stock order. If the
+    quantity does not match the description on the packing list and give to the Parts Manager.
+• Description- The description on the tag should be matched to the physical to insure the
+    proper part has been received. For example, if the tag description is bearing, and what we
+    have received are bolts a claim discrepancy has been identified. Note the discrepancy on the
+    packing list and give to the Parts Manager.
+
+• Item - Identifies the item number on the packing list. This allows for a quick check against
+    the packing list.
+
+• Once the parts have been compared to the packing list, and placed on the shelf, give the
+    packing list and noted discrepancy to the Parts Manager.
+
+
+
+
+                                                                                                10/21
+                                                                    Part III: Ordering. Returns
+
+                                       10. Order Filling
+
+Need to complete
+
+
+Establishing priority of filling orders based on the information on the document.
+List the important elements of filling the order
+
+• May show copy of document
+• Parts are listed in location sequence
+• How are parts to be tagged, bagged, marked
+• Where are orders placed once filled (Will Call, Shop/Field, Outbound shipment)
+• How are orders (once filled) to be marked
+
+• Ispect prior to shipment to er he rect or dared in any a react to be
+    may require repackaging.
+  When pullir
+
+      /henaling one in as dispose or seeked in packeria quantity, empty all the
+
+
+
+
+                                                                                         11/21
+                                                                    Part I!!: Ordering, Returns
+
+
+                                       11. Parts Returns
+
+ Customer Returns- Accepting parts returns from customers is an important part of our business. It
+is important a few points are kept in mind while processing credits:
+
+• Review the condition of the package the parts are being returned. Any broken packages, seals,
+    or soiled packages should be brought to the attention of the Parts Manager.
+• Verify the quantity, description, and condition of the parts being returned.
+• Be cautious of "cores" being returned. It can be easy to mistake a core for a new part being
+    returned.
+
+• Know the parts return policy for the parts being returned. The return criteria will vary based
+    on the vendor and type of parts.
+
+Vendor Returns- Returns sent back to our vendors are handled very similar to filling an order for
+a customer. The primary difference is there may be a need to remove big tags. A vendor return
+is divided into two portions. One is to ship back all of a particular part number, and another will
+be a partial shipment. It is important pull the return based on the direction from the Parts
+Manager.
+
+
+
+
+                                                                                             12/21
+                                                                    Part IV: Inventory Counts
+
+
+                                    12. Inventory Counts
+
+Proper conducting of the regular scheduled cycle counts and end of year physical counts validates
+the accuracy of the how well              manages it spare parts inventory.
+
+Refer to the Inventory Count policy        _and refer any questions to the local Parts/Warehouse
+Supervisor.
+
+A part found while conducting counts should be noted and the part number, description, and
+quantity given to the Parts Manager for additional research.
+
+
+
+
+                                                                                          13/21
+                                                                            Part V: Maintenance
+
+
+                               13. Warehouse Housekeeping
+
+Proper housekeeping of the warehouse area supports:
+• A safe work environment
+
+
+
+
+Take a look around the warehouse area and see if can identify examples of good and poor
+housekeeping.
+
+
+
+Daily Housekeeping Requirements:
+• Floor and dock areas are swept and trash
+    picked up and disposed
+ • Cabinets and shelves are dusted
+ • All trash cans are empted at end of shift. No
+    trash will be left in the warehouse after
+    hours.
+
+• Floor areas will be clear of oil/liquid spots
+    and spills.
+• Hose press area is cleaned and excess hose
+    in put back in the proper location after cach
+    use.
+
+
+Prevent Untidy Conditions:
+
+
+
+
+    be removed from pallet once it has been cut. This will also avoid potential of causing an
+    injury via being cut or tripping on the banding
+    material.
+• All tonnage is stored in a neat manner that is
+    assigned/designed for that purpose. Broken and
+    splintered pieces will be disposed of properly.
+• Broken pallets are replaced and thrown away. This
+    will avoid the potential of an injury due to the
+    pallet collapsing.
+• Overflow parts will not be stocked on the isle way
+     floors. Overflow will be moved to an assigned
+    area of the warehouse and marked accordingly.
+• Fire hydrants, door passageways, and electrical
+    junction boxes will be kept clear and accessible.
+
+
+
+
+                                                                                           14/21
+                                                                                  Part V: Maintenance
+
+
+                          14. Vehicle and Equipment Maintenance
+
+The treatment and maintenance of all warehouse equipment insures high productivity, lower
+operating cost, and encourages a safe working environment. All employees will be expected to
+operate all equipment in a manner that is respectful of others, and in a manner that will not
+sacrifice the health of the equipment.
+
+ •Speed or abuse of the equipment will not be tolerated
+ • Daily inspections will be conducted, with the needed repairs noted scheduled based on thi
+    severity of the repair need. If the repair that is needed is safety related, or will sacrifice the
+    health of the machine, the unit should be tagged out and not utilized until the repair has been
+    completed.
+• Unsafe equipment will be reported to the supervisor immediately, and the appropriate action
+    will be taken to correct the need.
+ • Vehicles will be kept clean inside and out at all times
+ • Prior to operating the vehicle a visual inspection will be completed and any noted damage
+    will be reported to the supervisor.
+• Vehicles should be filled if the tank is below ½full. This will insure quick response and
+    respect to the next individual that will be using the vehicle.
+
+ Each individual will be tasked trained to operate the various type of equipment that will be used
+during the daily warchouse operations.
+
+
+
+
+                                                                                                  15/21
+                                                                             Part V: Maintenance
+
+
+                                 15. Personal Improvement
+
+We have reviewed a great deal of information that relates to properly performing the warehouse
+responsibilities. One additional factor that will contribute to your success is your own personal
+attitude toward your job responsibilities, fellow workers, customers, and toward the
+accomplishments of the corporate goals.
+
+• A good attitude is contagious to others around us. Our attitude provides the opportunity to
+    develop relationships with our customers, and co-workers that will contribute to our success.
+    Your attitude is yours to own and manage.
+• Along with a positive attitude, the physical appearance you present also sends a message to
+    those around you, and contributes to the relationship with those we work with on an
+    individual basis. Your personal appearance should be neat and clean. Avoid wearing any
+    item that could be hazardous if you work around machinery.
+• One way to build success into your job performance is too continual grow your knowledge in
+    your profession. Recognize changes in our business and assist in finding ways we can better
+    perform our areas of responsibilities and our competitiveness in the market place.
+• Let your supervisor know what your career goals are and develop a personal plan that will
+    assist in developing the skill you need to accomplish your personal goals.
+
+
+
+
+                                                                                            16/21
+                                                                                  Part VI: Safety
+
+
+                                    16. Warehouse Safety
+
+• Warehouse Safety- Safety is everyone's responsibility. Each employee is expected to
+    perform their duties and responsibilities in a safe manner. Attending weekly safety meeting,
+    annual refresher training, and wearing of the proper personal protective equipment is an
+    expectation.
+• Common Warehouse Tools-Know how to safety operate all tools and equipment associated
+    with proper warehousing.
+• Proper Lifting- Serious injury can occur from improper lifting. It is important to follow the
+    proper guidelines in bending, lifting, and twisting while lifting and move parts.
+• Lift Truck Safety- Proper operating of all forklifts and other material handling equipment
+    will include proper training in operating practices of the equipment.
+• Improper use of hand tools is one of the largest contributors to injuries in the warehouse.
+    Use caution when using box cutters and knifes.
+• Hazardous Material Handling- Proper handling of the parts we stock that are classified
+    hazardous material require special stocking, shipping, and handling practices. Each employee
+    needs to be familiar with the Hazardous Material Safety Data sheets and the proper stocking
+    practices.
+• Hydraulic Hose building- Building of hydraulic hoses require specific training in the proper
+    use of utilizing hose presses, hose saws, and stocking of the spare parts associated with
+    hydraulic type parts.
+
+Specific training will be provided in the above areas and all questions need to be addressed as
+quickly as possible.
+
+
+
+
+                                                                                            17/21
+                                                                                  Part VI: Safety
+
+
+                                  17. General Safety Rules
+
+There are many job responsibilities that have been reviewed in the previously listed information,
+but an additional focus on some general safety practices are listed below:
+
+                    expects each employee to practice safe work habits in all tasks we perform.
+• Any violation of safe work habits can create, or contribute to the employee, someone else, or
+    property damage/injury.
+
+
+
+
+     hazardous conditions and inefficiencies in our operations.
+• Tooling, equipment, and materials used in our everyday jobs will be in good working order.
+    Any damaged or broken items will be removed from operation to prevent the opportunity
+    injury or damage.
+• Proper personal safety equipment will be used based on the task to be performed. It is the
+     supervisor's responsibility to provide the proper personal safety equipment for the job to be
+    performed.
+
+
+
+
+    lifting exceeds what should be expected based on the individual conditions.
+• Employees must know the location, operation, and proper use emergency equipment and the
+     proper practices based on the situation.
+
+
+
+
+                                                                                             18/21
+                                                                                     Attachment 1:
+
+
+
+
+                               Spare Parts Cycle Count Guidelines
+Purpose: To monitor the accuracy of the spare parts inventory in both the physical on hands and
+dollar value, and identify areas for improvement in the management of the spare parts inventory.
+Cycle count is not only a time to verify the physical on hand inventory, but to also verify that
+proper warehousing practices and procedures are being maintained.
+
+Count Schedule- The General Parts Manager is responsible to ensure each location is conducting
+weekly cycle counts. The trending of the line items counts and adjusted, percent line items
+adjusted, and dollar adjustments will be measured, monitored and corrective actions implemented
+on a location by location basis.
+
+Cycle Count Classification- The cycle classification will encompass that all high dollar items
+and faster moving items (individually priced or accumulative valve that exceed $2,000 and/or
+10% of the faster moving parts) will be counted every 90 days. Slower moving items will be
+counted at least once per year.
+
+Conducting Cycle Count- The proper conducting of cycle counts are critical in the proper
+management of the spare parts inventory:
+  • Prepare for the weekly cycle count. All stock put away and receipted, credit returns put
+       on the shelf, and orders to be pulled must be completed to allow for an accurate count.
+   • Receive the weekly cycle count report from the Parts Manager at the branch store.
+   • Conduct the physical count, without viewing the computer on hands. Note the physical
+       count on the count sheet. While doing the counts, view the warehouse area near the count
+       area looking for areas needing improvement in proper warehousing practices. Examples
+       of what to look for can be seen in the Warehouse Training Booklet. Note these concerns
+       on the count sheet to be addressed after the counts are completed.
+   • Enter the counts into the system based on the physical counts taken.
+
+Conducting Recounts- Recount reports will list any item that does not match in physical on
+hand and dollar amount.
+   • Conduct recount for the listed discrepancies. When conducting recounts take extra care to
+        identify the potential causes for the count being incorrect. This should include check the
+       locations in and around the part being counted, looking for credits, stock orders, or orders
+       that have not been processed.
+   • Enter the recounts into the system based on the physical recount.
+
+
+Entering Inventory Adjustments- Adjust inventory based on recounts. Select "Reports" and
+then "final Report" and print. This report shows the differences of the plus and minus for each
+item recounted. This list of items needs to be adjusted accordingly. Access work order no.
+XCYCLE and the appropriate segment that corresponds with the assigned store number (17
+California for example. Enter the item if shortage exist, and enter a (-) if an overage occurs.
+All of the adjustments should be done on one document.
+
+
+                                                                                              19/21
+                                                                                       Attachment 1
+
+
+
+Reviewing of Inventory Adjustments- It is important to review the line item and dollar
+adjustment to identify possible trends and implement corrective action to better manage the spare
+parts inventory.
+   • The Parts Manager at each location (if there is not an assigned Parts Manager the
+       Corporate Parts Manager is responsible) will review the inventory adjustments weekly
+       and research the discrepancies of line items and dollar adjustments. The review will
+       include reviewing stock receipt dates and quantities, parts return and credits, orders
+        placed, package quantities, core credits, etc.
+   • The Corporate Parts Manager will provide a monthly report showing the adjustments by
+       location to each Store's assigned Parts Manager. The causes that have been identified will
+       be reviewed and track for areas of improvement. The results of the count adjustments will
+       be posted in the work areas as a key measurable.
+
+Inventory Report Maintenance Practices- Performing regular inventory report maintenance
+insures an environment that promotes inventory accuracy. The following reports support the
+proper practice of managing the parts inventory:
+   • Bin Maintenance Report - This report is used to verify the parts information system
+       matches the physical information in the warehouse. The report shows the part number,
+       description, and location of the entire warehouse in location sequence. The purpose is to
+       match the report against the actual bin tag on the shelf. Note any discrepancies and return
+       to Parts Manager for review and correction. The typical discrepancies will be:
+              The part number is not on the report, and there is a bin tag (but no part). The bin
+               tag should be removed.
+           • The part number is on the report, and there is a bin tag. The report and bin match,
+               so no additional action is necessary.
+           • The part number is on the report, and there is not a bin tag. Verify if there are any
+               items on stock order, or if a recent location change has been made, and determine
+               if the bin location should be deleted or a bin tag put in place.
+           • The part number has a bin tag, but is not on the report. Review if there has been a
+              recently assigned new bin location since the report was run. If the bin tag matches
+               the system no future action is necessary. If the system shows there is not assigned
+              location, and there are no parts on order then remove the bin tag.
+
+   • Deleted Record Report- This report prints at the time that stock orders are printed for
+       review.The purpose of this report is to identify the line item locations that are being
+       deleted due to a zero on-hand and insufficient history to justify stocking the part. The
+       report is to be verified by checking the report to the actual bin location to verify there are
+       no parts on the shelf. If there are no parts on the shelf the bin tag is to be removed. The
+       employee that reviewed the report vs. the parts shelf will sign the report and maintain the
+       report in a file. The file is to be maintained for the fiscal year. When checking the shelf
+       and a part is located, count the part number quantity and provide the report to the Parts
+       Manager who will research the part to determine the proper disposition of keeping or
+       disposing of the part.
+
+
+
+
+                                                                                               20/21
+                                                                                     Attachment 1
+
+
+   • Open Order Age Report- This report identifies what parts are on order and the age of
+       the order. The purpose of keeping this report current is to identify if any part may have
+       come in, have been put on the shelf and not receipted; and noting any potential parts
+       shortages due to the supplier not being able to fill the stock order needs. This report
+       should be reviewed monthly by the appropriate Parts Manager.
+
+Corrective Action-
+ An important element for continuous improvement is to identify areas that continue to arise,
+identify the cause, and implement a corrective action to prevent the reoccurrence. The following
+information is intended to provide a guide on reducing the reason for a recount.
+    • Identifying common causes for discrepancies and determine if the cause is due to lack of
+        training, poor warehousing practices, improper documentation, lack of timely processing
+         of orders, receipting of stock orders and credits, or other causes that have created the
+       inventory inaccuracy.
+   • Any location that has three months of over 5% of the line items adjusted, and/or 1.5%
+       (plus or minus) of the store's dollar value counted will have an onsite inventory review
+       that will include the Corporate Parts Manager, Inventory Control Supervisor, and the
+       assigned Parts Manager.
+   • The purpose of the onsite review will be to determine the causes for high line item and/or
+       dollar adjustments and implement corrective action. A monthly review with the specific
+       parts department will be conducted with a documented corrective action plan
+       implemented and followed.
+
+
+
+
+                                                                                             21/21
+

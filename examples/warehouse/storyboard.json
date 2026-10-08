@@ -1,0 +1,1178 @@
+{
+  "meta": {
+    "title": "Warehouse Training Packet",
+    "target_seconds": 1200,
+    "words_per_minute": 140,
+    "total_words": 2802,
+    "est_total_seconds": 1254.7,
+    "voice": "Charon",
+    "persona": "A relaxed, experienced warehouse trainer in their forties, speaking to a new hire on their first day. Warm, plain-spoken and unhurried, at a steady medium pace with natural pauses at full stops. Clear and confident on safety rules without sounding stern. No sales energy, no exclamation marks; the tone of a trusted senior colleague walking you around the floor.",
+    "source": "source/packet.txt plus page images; sections cited per scene in packet_sections",
+    "notes": [
+      "est_seconds per beat = words/140*60 + hold_seconds. Scene est_seconds is the sum of its beats. Crossfades between scenes are 0.5 s and overlap, so they add no time.",
+      "Narration spells out small numbers; on-screen text may use digits.",
+      "Section 10 of the packet is marked 'Need to complete'; only its finished bullets are taught (location sequence, destinations, inspect damaged parts, empty package remainder into bin).",
+      "The packet's company name is blanked out everywhere; narration says 'the company'.",
+      "The project's timing.py adds 1.0 s lead-in and 1.4 s tail per scene and a 0.6 s gap after each narrated clip (about 65 s over 9 scenes and 73 beats) on top of est_total_seconds. Holds here are sized with that padding in mind: title cards hold 2 s plus the lead-in, quiz pauses are 2.5 s plus the gap.",
+      "s09b06a-s09b06d were added after narration was measured (Charon runs at about 163 wpm). Their est_seconds use words/163*60 + hold_seconds + the 0.9 s clip gap; other beats keep the original 140 wpm estimate, so est_total_seconds is a mix. build/timing.json is authoritative."
+    ]
+  },
+  "music": [
+    {
+      "id": "m01",
+      "prompt": "Warm, optimistic corporate instrumental for a training video opening. Light acoustic guitar, soft felt piano, gentle marimba, subtle brushed percussion at 96 BPM. Clean, friendly, uncluttered, no vocals, loops smoothly, mixed quiet to sit under narration.",
+      "scenes": [
+        "s01",
+        "s09"
+      ]
+    },
+    {
+      "id": "m02",
+      "prompt": "Calm, steady procedural underscore for instructional narration. Minimal electric piano, soft synth pad, muted plucked bass, light shaker at 88 BPM. Neutral and focused, very low dynamics, no melody hooks, no vocals, loops seamlessly.",
+      "scenes": [
+        "s02",
+        "s03",
+        "s04",
+        "s05",
+        "s06"
+      ]
+    },
+    {
+      "id": "m03",
+      "prompt": "Grounded, purposeful instrumental underscore for workplace maintenance and safety training. Low warm piano chords, soft cello pad, light wood-block pulse at 84 BPM. Measured and reassuring with a slightly serious tone, no drums fills, no vocals, loops seamlessly, mixed quiet under speech.",
+      "scenes": [
+        "s07",
+        "s08"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s01",
+      "title": "Welcome and Purpose",
+      "part": "Part I: Purpose",
+      "packet_sections": [
+        "1. Purpose of Warehouse Training Packet",
+        "2. Common Errors and Preventions"
+      ],
+      "mood": "Warm, unhurried welcome. Confident but friendly, like a senior colleague on your first morning.",
+      "words": 231,
+      "est_seconds": 103.9,
+      "beats": [
+        {
+          "id": "s01b01",
+          "narration": "Welcome to the Warehouse Training Packet. Over the next twenty minutes we will walk through how freight is received, how parts are packaged, stored and shipped, how orders and returns are handled, how inventory is counted, and how we keep the warehouse clean, well maintained and safe.",
+          "visual": "OPENING TITLE. Navy background (bg-dark). Thin isometric outline of a warehouse (Warehouse Map asset, line-art state) draws itself on over 1.5 s. Title text 'Warehouse Training Packet' rises in (fade+12px up), with a thin accent rule under it. At 'how freight is received' the Worker (pose: wave) walks in from the left and stops at a Pallet with two Cartons. Six small icons pop in along a ProgressTimeline at the bottom in sync with the narration: BoxTruck, Carton, PalletRack, PickTag, CountSheet, Broom, HazardSign (one every ~0.6 s, scale 0 to 1 with ease-out-back). Hold on the complete timeline.",
+          "onscreen_text": [
+            "Warehouse Training Packet"
+          ],
+          "hold_seconds": 3,
+          "words": 47,
+          "est_seconds": 23.1,
+          "delivery": "Slow and welcoming; land the title before the list begins."
+        },
+        {
+          "id": "s01b02",
+          "narration": "Why does this matter? The packet puts it simply. Warehouse personnel help manage one of the company's largest assets, the spare parts inventory. The accuracy of everything we do contributes to the credibility of that inventory.",
+          "visual": "Cut to light background (bg-light). A PalletRack (three bays, stocked state) sits centre. A Callout appears above it reading 'One of the company's largest assets' then morphs into a second Callout 'Accuracy = credibility'. The Worker (pose: hold-clipboard) stands beside the rack and nods (two-frame head bob). Cartons on the rack get small green check badges one by one as 'accuracy' is said.",
+          "onscreen_text": [
+            "One of the company's largest assets",
+            "Accuracy builds credibility"
+          ],
+          "hold_seconds": 0,
+          "words": 36,
+          "est_seconds": 15.4
+        },
+        {
+          "id": "s01b03",
+          "narration": "Our customers rely on the availability of our spare parts to keep their machines operating. Accurate inventory and timely, accurate work build their confidence in our ability to serve them. And when everyone does their own area accurately and on time, the whole company becomes more efficient.",
+          "visual": "Three-panel strip slides in left to right. Panel 1: Customer icon (hard-hat person silhouette beside a simple excavator outline, Machine asset) with a gear turning; a Carton arrives via a dashed arrow and the gear speeds up. Panel 2: Terminal showing an on-hands table with a green check. Panel 3: three Worker silhouettes (poses: carry-carton, hold-clipboard, point) each with a green check, connected by arrows into a loop that spins once. Panels appear in sync with the three sentences.",
+          "onscreen_text": [
+            "Customers rely on availability",
+            "Accurate and timely",
+            "Everyone's area, done right"
+          ],
+          "hold_seconds": 0,
+          "words": 47,
+          "est_seconds": 20.1
+        },
+        {
+          "id": "s01b04",
+          "narration": "The packet also summarises the most common errors. They typically relate to the timely processing of documentation. Managing parts inventory means processing every activity on time, storing, stocking, shipping, counting, and the paperwork that goes with each.",
+          "visual": "A Clipboard/Manifest slides in centre with a Clock beside it. The Clock hand sweeps fast and the Clipboard tints red (error colour) with a small red X badge: 'Late paperwork'. Then four small icons line up beneath it, Carton on shelf (store), PalletRack (stock), BoxTruck (ship), CountSheet (count), each with a mini PackingSlip attached by a dotted line, appearing on the matching word.",
+          "onscreen_text": [
+            "Common errors: late documentation",
+            "Store  •  Stock  •  Ship  •  Count"
+          ],
+          "hold_seconds": 0,
+          "words": 37,
+          "est_seconds": 15.9
+        },
+        {
+          "id": "s01b05",
+          "narration": "To avoid those errors, understand the impact each task has on the inventory, follow the required instructions, and ask for assistance in any area you are not familiar with. This packet cannot cover every task, so never hesitate to ask your supervisor.",
+          "visual": "Checklist card with three items ticking on in sync: 'Understand the impact', 'Follow the instructions', 'Ask for assistance'. On the last sentence the Worker (pose: point, question-mark Callout above head) walks to the Supervisor (Worker variant: supervisor, pose: stand, thumbs-up) at the right edge; the question-mark Callout turns into a green check.",
+          "onscreen_text": [
+            "Understand the impact",
+            "Follow the instructions",
+            "Ask for assistance"
+          ],
+          "hold_seconds": 0,
+          "words": 42,
+          "est_seconds": 18.0
+        },
+        {
+          "id": "s01b06",
+          "narration": "Here is the road ahead. Six parts, from the receiving dock to safety. Let's begin where the inventory begins, at the dock.",
+          "visual": "Table-of-contents card: six rows slide in with roman numerals and titles: 'I Purpose', 'II Receiving, Storing, Shipping', 'III Ordering, Returns', 'IV Inventory Counts', 'V Maintenance', 'VI Safety'. Row I is already checked (muted); row II highlights with the accent colour as the narrator says 'at the dock'. Calm hold on the list for the crossfade.",
+          "onscreen_text": [
+            "I  Purpose",
+            "II  Receiving, Storing, Shipping",
+            "III  Ordering, Returns",
+            "IV  Inventory Counts",
+            "V  Maintenance",
+            "VI  Safety"
+          ],
+          "hold_seconds": 2,
+          "words": 22,
+          "est_seconds": 11.4
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "Receiving of Freight",
+      "part": "Part II: Receiving, Storing, Shipping",
+      "packet_sections": [
+        "3. Receiving of Freight"
+      ],
+      "mood": "Procedural and clear. Slightly firmer on the safety rule, then steady and methodical through the steps.",
+      "words": 279,
+      "est_seconds": 124.5,
+      "beats": [
+        {
+          "id": "s02b01",
+          "narration": "Receiving of freight is the beginning point of spare parts inventory management. Get this step right and everything downstream, stocking, filling and counting, gets easier.",
+          "visual": "SECTION TITLE CARD: 'Part II' small caps above 'Receiving, Storing, Shipping', sub-line '3. Receiving of Freight'. Hold 3 s, then the card wipes up to reveal the dock scene: DockDoor (open) at right, concrete floor line, empty staging area with a dashed outline labelled 'Receiving'. A horizontal ProgressTimeline appears at the bottom with seven empty nodes (Chock, Inspect and count, Sign, Sort, Check in, Document, File) that will light up through the scene.",
+          "onscreen_text": [
+            "Part II",
+            "Receiving, Storing, Shipping",
+            "3. Receiving of Freight"
+          ],
+          "hold_seconds": 2,
+          "words": 25,
+          "est_seconds": 12.7
+        },
+        {
+          "id": "s02b02",
+          "narration": "Before anything else, a safety rule with no exception. Every delivery truck must have its wheels chocked. Make sure the delivery drivers know this. Every truck, every time.",
+          "visual": "BoxTruck reverses in from the left to the DockDoor (ease-out, 1.2 s, slight settle bounce). Worker (pose: point) gestures at the wheel. Driver (Worker variant: driver, pose: kneel) places a WheelChock against the rear tyre (chock slides in and clicks, small motion lines). A red safety stamp 'NO EXCEPTION' slams onto the upper right (scale 1.4 to 1, 0.3 s). Timeline node 1 'Chock' lights green.",
+          "onscreen_text": [
+            "Wheels chocked",
+            "NO EXCEPTION"
+          ],
+          "hold_seconds": 0,
+          "words": 28,
+          "est_seconds": 12.0,
+          "delivery": "Firm and deliberate on 'no exception'."
+        },
+        {
+          "id": "s02b03",
+          "narration": "Incoming freight is unloaded and inspected for damages and shortages before the manifest is signed. Shipments are counted and compared to the shipping manifest that comes with them. This must be done before signing the carrier's receipt.",
+          "visual": "Cartons slide out of the truck onto a Pallet one at a time (five cartons). A counter badge above the pallet ticks 1 to 5. A Clipboard/Manifest floats at the right with five line items; each line gets a green check as the count badge ticks. The signature line at the bottom of the manifest is greyed with a small padlock icon until the fifth check, when the padlock unlocks and a pen stroke signs it. Timeline nodes 2 'Inspect and count' and 3 'Sign' light.",
+          "onscreen_text": [
+            "Count  •  Inspect  •  Compare",
+            "Then sign"
+          ],
+          "hold_seconds": 0,
+          "words": 37,
+          "est_seconds": 15.9
+        },
+        {
+          "id": "s02b04",
+          "narration": "If you find damage, note it on the manifest. Then follow the carrier's guidelines for filing a freight claim. Timeliness and proper documentation are critical to processing a claim, and taking photos can be very helpful in noting and settling it.",
+          "visual": "One Carton on the pallet switches to the damaged state (crushed corner, red outline pulse). Worker (pose: inspect, magnifier) leans in. A Camera icon pops in above and flashes white (two frames). On the Manifest a handwritten-style red line 'Damage noted' writes on. A small Clock icon beside the manifest with a green check reads 'On time'. Second Callout: 'Carrier's claim guidelines'.",
+          "onscreen_text": [
+            "Note damage on the manifest",
+            "Photos help",
+            "Follow carrier's claim guidelines"
+          ],
+          "hold_seconds": 0,
+          "words": 41,
+          "est_seconds": 17.6
+        },
+        {
+          "id": "s02b05",
+          "narration": "Freight then goes to the designated area for sorting between stock orders and emergency orders. The two have different clocks. Stock orders are checked and put in their proper locations within twenty-four hours after receiving.",
+          "visual": "Camera pans (whole-group translate) to a sorting zone: floor marked with two lanes, a blue lane labelled 'Stock orders' and a red lane labelled 'Emergency orders'. Cartons slide from the pallet into lanes (three blue, two red). Above the blue lane a Clock/Timer fills clockwise with a blue arc and the label '24 h' counts up. A PalletRack appears at the end of the blue lane and the blue cartons slide into bins. Timeline node 4 'Sort' lights.",
+          "onscreen_text": [
+            "Stock orders: 24 hours",
+            "Emergency orders"
+          ],
+          "hold_seconds": 0,
+          "words": 36,
+          "est_seconds": 15.4
+        },
+        {
+          "id": "s02b06",
+          "narration": "Emergency orders are checked in within two hours after receiving, because customers and shop orders are waiting on them. Freight charges are then determined and added to the shop and customer orders.",
+          "visual": "Focus shifts to the red lane. A Clock/Timer fills with a red arc and the label '2 h' appears, with a subtle urgency pulse (scale 1.0 to 1.04). A PackingSlip labelled 'Customer order' and another labelled 'Shop order' appear beside the cartons, with a 'Pending' badge. A price-tag icon labelled 'Freight charges' swings in and attaches to each slip. Timeline node 5 'Check in' lights.",
+          "onscreen_text": [
+            "Emergency orders: 2 hours",
+            "Add freight charges"
+          ],
+          "hold_seconds": 0,
+          "words": 32,
+          "est_seconds": 13.7
+        },
+        {
+          "id": "s02b07",
+          "narration": "For emergency orders going to the shop or to customer destinations, the proper packing slips are printed and attached to the shipment. Air shipments come through UPS and FedEx.",
+          "visual": "Terminal at left prints a PackingSlip (paper slides up out of a printer slot on the terminal base). The slip flies and sticks onto the red carton with a small tape strip. Two destination icons at right: 'Shop' (wrench badge) and 'Customer' (Machine asset). Then two generic Plane icons glide across the top with neutral tags 'UPS' and 'FEDEX' in plain text (no brand logos).",
+          "onscreen_text": [
+            "Packing slip attached",
+            "Air: UPS, FEDEX"
+          ],
+          "hold_seconds": 0,
+          "words": 29,
+          "est_seconds": 12.4
+        },
+        {
+          "id": "s02b08",
+          "narration": "Paperwork then goes to the Inventory Analyst to input into the computer system, which updates the inventory on hand. And every day, all incoming and outgoing paperwork is filed in the appropriate folders for future reference.",
+          "visual": "Worker (pose: walk, hold-clipboard) walks right and hands the Clipboard to the Analyst (Worker variant: analyst, seated at a Terminal). The Terminal screen shows an on-hands table and one quantity ticks up (e.g. 12 to 17) with a green flash. Then a FolderDrawer asset opens at the right; two document icons labelled 'In' and 'Out' drop into folders and the drawer closes. A small 'Daily' badge sits on the drawer. Timeline nodes 6 'Document' and 7 'File' light.",
+          "onscreen_text": [
+            "Inventory Analyst updates on-hands",
+            "File paperwork daily"
+          ],
+          "hold_seconds": 0,
+          "words": 36,
+          "est_seconds": 15.4
+        },
+        {
+          "id": "s02b09",
+          "narration": "Chock, inspect and count, sign, sort, check in on time, document, file. That is receiving.",
+          "visual": "All scene elements fade to 30 percent; the ProgressTimeline rises to centre and enlarges. Each node re-pulses green in order as the narrator names it. Calm hold on the complete timeline for the crossfade.",
+          "onscreen_text": [
+            "Chock",
+            "Inspect and count",
+            "Sign",
+            "Sort",
+            "Check in",
+            "Document",
+            "File"
+          ],
+          "hold_seconds": 3,
+          "words": 15,
+          "est_seconds": 9.4,
+          "delivery": "Crisp list rhythm, then relaxed on the last sentence."
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "Packaging and Storing of Parts",
+      "part": "Part II: Receiving, Storing, Shipping",
+      "packet_sections": [
+        "4. Packaging of Parts",
+        "5. Storing of Parts"
+      ],
+      "mood": "Explanatory and patient. The three packaging types need clear separation; the do/don't list is brisk.",
+      "words": 355,
+      "est_seconds": 155.3,
+      "beats": [
+        {
+          "id": "s03b01",
+          "narration": "Parts arrive in different types of packaging, and each type must be identified and handled properly. The packet describes three.",
+          "visual": "Light background. Sub-title lower-third: '4. Packaging of Parts'. Three identical Cartons slide in to three columns and receive labels in turn: 'Multiple packaged', 'Set', 'Kit'. Worker (pose: inspect) stands at left looking at them.",
+          "onscreen_text": [
+            "4. Packaging of Parts",
+            "Multiple packaged  •  Set  •  Kit"
+          ],
+          "hold_seconds": 0,
+          "words": 20,
+          "est_seconds": 8.6
+        },
+        {
+          "id": "s03b02",
+          "narration": "Multiple packaged parts are parts with more than one in the package. For example, a package may hold a quantity of ten, but the parts are sold as individual units.",
+          "visual": "Column 1 enlarges to centre (other two shrink to the sides). The Carton opens (lid flaps rotate) and ten identical small Part icons (bolts) pop out into a 2x5 grid. A badge reads 'Package qty 10'. Then one bolt lifts out and a tag 'Sold as 1 unit' appears beside it. Kit/Set/Multipack diagram: Multipack state.",
+          "onscreen_text": [
+            "Package qty 10",
+            "Sold as individual units"
+          ],
+          "hold_seconds": 0,
+          "words": 30,
+          "est_seconds": 12.9
+        },
+        {
+          "id": "s03b03",
+          "narration": "Parts packed in sets consist of two or more identical pieces that together make a quantity of one set. Two brake shoes, for example, make one set.",
+          "visual": "Column 2 to centre. Two identical BrakeShoe icons slide in from the sides and a bracket draws around both; a label '= QTY 1 SET' stamps on. Kit/Set/Multipack diagram: Set state.",
+          "onscreen_text": [
+            "2 brake shoes = 1 set"
+          ],
+          "hold_seconds": 0,
+          "words": 27,
+          "est_seconds": 11.6
+        },
+        {
+          "id": "s03b04",
+          "narration": "Parts packed in kits consist of multiple different parts and quantities that make one kit. A cylinder seal kit, for example, contains seals, seal bearings and oil bearings, and together they reseal or rebuild one hydraulic cylinder.",
+          "visual": "Column 3 to centre. A HydraulicCylinder outline (simple rod-and-barrel) draws in. Three groups of small part icons fly in and slot into dotted positions on the cylinder: 'Seals' (rings), 'Seal bearings', 'Oil bearings'. A bracket gathers all three with the label '= 1 KIT'. Kit/Set/Multipack diagram: Kit state. Short settle.",
+          "onscreen_text": [
+            "Cylinder seal kit",
+            "Seals  •  Seal bearings  •  Oil bearings",
+            "= 1 kit"
+          ],
+          "hold_seconds": 1,
+          "words": 37,
+          "est_seconds": 16.9
+        },
+        {
+          "id": "s03b05",
+          "narration": "Now, storing. Warehouse space is almost always limited, so efficient use of it is critical. Stacked cartons should plainly display the part number. That makes order filling quicker and helps avoid pulling errors.",
+          "visual": "Lower-third changes to '5. Storing of Parts'. A PalletRack (two bays, three shelves) fills the frame. Cartons stack on the lower shelf; the ones facing the wrong way (blank side) rotate 90 degrees to show a LocationLabel-style part number on the front, each with a small green check. Worker (pose: carry-carton) places the last one.",
+          "onscreen_text": [
+            "5. Storing of Parts",
+            "Part number facing front"
+          ],
+          "hold_seconds": 0,
+          "words": 33,
+          "est_seconds": 14.1
+        },
+        {
+          "id": "s03b06",
+          "narration": "Avoid stocking multiple parts in the same location. When it cannot be avoided, make sure the parts are dissimilar. Every bin location is clearly marked with the correct part number, and any bin label that is damaged, partially missing or worn gets replaced.",
+          "visual": "DoDontPanel, two columns. Left (red X): one bin holding two very similar Bolt icons with slightly different part numbers. Right (green check): a bin holding a Bolt and a HoseCoil, clearly different. Below, a close-up bin edge: a LocationLabel in the worn state (torn corner, faded digits) peels off and a crisp new LocationLabel slides into place with a green check.",
+          "onscreen_text": [
+            "Dissimilar parts only",
+            "Replace worn or damaged labels"
+          ],
+          "hold_seconds": 0,
+          "words": 43,
+          "est_seconds": 18.4
+        },
+        {
+          "id": "s03b07",
+          "narration": "When parts are stored outside, the carton must be weatherproof enough to protect what is inside. Moisture from condensation can cause rust and damage to parts stored inside closed crates or cartons.",
+          "visual": "Outdoor strip: a sky band, a WeatherproofCrate and a plain Carton side by side. Rain lines fall. On the plain Carton, condensation droplets appear inside a cutaway and a Part icon inside gains orange rust speckles, red X. The WeatherproofCrate stays dry, green check.",
+          "onscreen_text": [
+            "Outside storage: weatherproof carton",
+            "Condensation causes rust"
+          ],
+          "hold_seconds": 0,
+          "words": 32,
+          "est_seconds": 13.7
+        },
+        {
+          "id": "s03b08",
+          "narration": "Proper stocking looks like this. Every part placed in stock has a visible part number on the part or carton. All part numbers face front in racks and shelving. Overstock locations are clearly tagged, so overstock is used before pulling from the permanent location.",
+          "visual": "Checklist card at left ticks three items. At right, a PalletRack: lower bins are the 'permanent location' with a LocationLabel; the top shelf has cartons with an orange OverstockTag reading 'Overstock' and an arrow pointing down to the permanent bin, animating 'use first'.",
+          "onscreen_text": [
+            "Visible part number",
+            "Part numbers face front",
+            "Overstock tagged, used first"
+          ],
+          "hold_seconds": 0,
+          "words": 44,
+          "est_seconds": 18.9
+        },
+        {
+          "id": "s03b09",
+          "narration": "Process all discrepancies within the established guidelines and time frames. Remove unnecessary tags, wire, tape and strapping. And make it clear whether a part is sold individually or in package quantity.",
+          "visual": "Checklist continues ticking three more items. Beside it a Carton with a Banding strap and a loose tag: scissors icon snips the strap, which falls away; the stray tag fades. Then a label flips between 'Each' and 'Pkg of 10' and settles on both displayed clearly on a bin tag.",
+          "onscreen_text": [
+            "Process discrepancies on time",
+            "Remove tags, wire, tape, strapping",
+            "Each or package quantity: make it clear"
+          ],
+          "hold_seconds": 0,
+          "words": 31,
+          "est_seconds": 13.3
+        },
+        {
+          "id": "s03b10",
+          "narration": "Prevent improper stocking. Never overstock a location. If it is not large enough, have the location changed. Never overload wire baskets or shelves. Make sure the part number and description match the part being stocked. Do not remove protective packaging that guards against rust, dirt and weather. And store parts with machined surfaces so those surfaces are protected.",
+          "visual": "Full-width DoDontPanel with five rows, each row sliding in as named. Row 1: bin bulging with cartons (red X) vs same cartons in a larger bay (green check). Row 2: WireBasket in overloaded state, sagging (red X) vs normal (green check). Row 3: LocationLabel '123-A' against carton '123-A' with green check, versus mismatched '123-B' red X. Row 4: Part in protective wrap kept on (green) vs wrap torn off (red). Row 5: machined Shaft icon on a padded cradle (green) vs tossed loose on steel shelf with scratch marks (red). Hold on the completed panel.",
+          "onscreen_text": [
+            "Never overstock a location",
+            "Never overload baskets or shelves",
+            "Part number and description match",
+            "Keep protective packaging on",
+            "Protect machined surfaces"
+          ],
+          "hold_seconds": 2,
+          "words": 58,
+          "est_seconds": 26.9,
+          "delivery": "Brisk, evenly paced list."
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "Locations, Mezzanine, Packing and Shipping",
+      "part": "Part II: Receiving, Storing, Shipping",
+      "packet_sections": [
+        "6. Warehouse Location System",
+        "7. Mezzanine Storage",
+        "8. Packing and Shipping"
+      ],
+      "mood": "Light and practical. Sections are short, so keep momentum; a touch more weight on the fifty-pound guideline.",
+      "words": 259,
+      "est_seconds": 113.0,
+      "beats": [
+        {
+          "id": "s04b01",
+          "narration": "Each warehouse has a layout based on the type and size of the parts it holds. As a new employee you will become familiar with that layout and help stock parts in a way that supports the location system.",
+          "visual": "Lower-third: '6. Warehouse Location System'. Warehouse Map asset (top-down isometric): the outline draws, then rows of PalletRack blocks drop in one row at a time. Rows are labelled A to F along the bottom. Worker (pose: walk) walks down the central aisle, a dotted trail behind.",
+          "onscreen_text": [
+            "6. Warehouse Location System"
+          ],
+          "hold_seconds": 0,
+          "words": 39,
+          "est_seconds": 16.7
+        },
+        {
+          "id": "s04b02",
+          "narration": "Two things make a location system easy to use. All aisles are properly marked and easy to identify. And sections within a row are clearly marked, so you can find the proper location quickly. Any question about proper stocking goes to the Parts or Warehouse Supervisor.",
+          "visual": "AisleSign assets (hanging placards 'A', 'B', 'C') drop from the top over each aisle on 'aisles are properly marked'. Then the map zooms into one row: SectionMarker labels '01', '02', '03' slide onto the rack uprights, and a LocationLabel 'B-02-3' assembles from the three parts (aisle, section, shelf) with a bracket. On the last sentence the Supervisor (Worker variant) appears at right with a Callout 'Ask the Parts/Warehouse Supervisor'.",
+          "onscreen_text": [
+            "Aisles marked",
+            "Sections marked",
+            "Questions: Parts/Warehouse Supervisor"
+          ],
+          "hold_seconds": 0,
+          "words": 46,
+          "est_seconds": 19.7
+        },
+        {
+          "id": "s04b03",
+          "narration": "The mezzanine is intended for lighter, slower moving inventory, and for storing supplies, packing material and cartons.",
+          "visual": "Lower-third: '7. Mezzanine Storage'. Side elevation: the Mezzanine asset (upper deck with railing and stairs) builds up from the floor. Light Carton icons labelled 'Supplies', 'Packing', 'Cartons' float up the stairs path onto the deck. A heavy Pallet of parts at ground level gets a small 'stays below' tag.",
+          "onscreen_text": [
+            "7. Mezzanine Storage",
+            "Lighter, slower moving",
+            "Supplies, packing, cartons"
+          ],
+          "hold_seconds": 0,
+          "words": 17,
+          "est_seconds": 7.3
+        },
+        {
+          "id": "s04b04",
+          "narration": "It is kept to the same high standard of cleanliness as the main warehouse. Shelves stay free of dust and organised to the same practices. And every weight limitation is clearly marked and followed.",
+          "visual": "On the mezzanine deck the Worker (pose: sweep) sweeps; dust specks vanish. Shelves on the deck align neatly (cartons snap to grid). A WeightLimitSign (yellow placard with a scale icon and the text 'MAX LOAD', no number) bolts onto the railing with a bounce and a green check.",
+          "onscreen_text": [
+            "Same cleanliness standard",
+            "Weight limits marked and followed"
+          ],
+          "hold_seconds": 0,
+          "words": 34,
+          "est_seconds": 14.6
+        },
+        {
+          "id": "s04b05",
+          "narration": "Packing and shipping is where customers see our professionalism. If a customer does not receive all the parts they ordered, or the order is incorrect, the company's image suffers.",
+          "visual": "Lower-third: '8. Packing and Shipping'. Right side: Customer icon beside their Machine asset. A Carton arrives by dashed arrow and opens; three part silhouettes inside, one drawn as a dashed red outline labelled 'missing'. The Machine's gear stops and a small red frown Callout appears over the customer. Then a mirror version where all three parts are solid and the gear turns, green check.",
+          "onscreen_text": [
+            "8. Packing and Shipping",
+            "Complete and correct"
+          ],
+          "hold_seconds": 0,
+          "words": 29,
+          "est_seconds": 12.4
+        },
+        {
+          "id": "s04b06",
+          "narration": "Each part is plainly marked or tagged with the part number and quantity. Clean boxes and packaging are used for every customer shipment. And know the cut off times for each shipper, so orders are processed in time to make them.",
+          "visual": "Packing bench: a Part icon receives a hanging Tag that writes 'P/N 123-A  QTY 2'. A clean Carton (green check) sits beside a scuffed, dusty Carton (red X) that fades out. At right a Clock with a red wedge marked 'Cut off' and three small BoxTruck icons leaving at different times; a Carton slides onto the last truck just before the hand reaches the wedge.",
+          "onscreen_text": [
+            "Part number and quantity tagged",
+            "Clean boxes only",
+            "Know shipper cut off times"
+          ],
+          "hold_seconds": 0,
+          "words": 41,
+          "est_seconds": 17.6
+        },
+        {
+          "id": "s04b07",
+          "narration": "Do not over pack a carton in a way that creates a safety hazard or makes it hard for the customer to handle. Everyone has different lifting limits. As a general rule, a single carton should not exceed fifty pounds, though that can vary with the size, shape and dimensions of the part.",
+          "visual": "A Carton on a Scale asset. Parts drop in and the needle climbs; it passes a red line and the badge reads '50 lb' in red, the Carton bulges and a red X appears. Rewind: the parts split into two Cartons, each on the scale under the line, green checks. Worker (pose: lift-bent-knees) lifts one comfortably. Calm hold for the crossfade.",
+          "onscreen_text": [
+            "General rule: one carton ≤ 50 lb",
+            "Varies with size, shape, dimensions"
+          ],
+          "hold_seconds": 2,
+          "words": 53,
+          "est_seconds": 24.7
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "Stock Orders and Order Filling",
+      "part": "Part III: Ordering, Returns",
+      "packet_sections": [
+        "9. Stock Order Processing",
+        "10. Order Filling"
+      ],
+      "mood": "Teaching mode. Walk the pick tag field by field, slowly; the order-filling beats are practical and brisk.",
+      "words": 315,
+      "est_seconds": 139.9,
+      "beats": [
+        {
+          "id": "s05b01",
+          "narration": "Part three, ordering and returns. Processing stock orders is a critical step in getting the proper parts to the customer at the proper time. The goal is all received stock on the shelf, with on-hands current, within eight hours of receipt.",
+          "visual": "SECTION TITLE CARD: 'Part III' over 'Ordering, Returns', sub-line '9. Stock Order Processing'. Hold 2 s, wipe up. Reveal: a Pallet of received Cartons at left, a PalletRack at right, a Clock/Timer between them filling to '8 h' as cartons slide one by one into bins; a Terminal below the clock shows 'On hand' ticking up to match.",
+          "onscreen_text": [
+            "Part III",
+            "Ordering, Returns",
+            "9. Stock Order Processing",
+            "Goal: on the shelf within 8 hours"
+          ],
+          "hold_seconds": 2,
+          "words": 42,
+          "est_seconds": 20.0
+        },
+        {
+          "id": "s05b02",
+          "narration": "Each item arrives with a vendor's pick tag. Let's read it together.",
+          "visual": "The PickTag asset (a plain white ticket, generic, no vendor branding) zooms to fill 60 percent of the frame. It shows five labelled fields in a grid: LOCATION, PART NUMBER, PICK QTY, DESCRIPTION, ITEM, plus a decorative barcode band and a greyed 'Order Ticket' header. All fields are dimmed; they will highlight one at a time.",
+          "onscreen_text": [
+            "Vendor pick tag"
+          ],
+          "hold_seconds": 1,
+          "words": 12,
+          "est_seconds": 6.1
+        },
+        {
+          "id": "s05b03",
+          "narration": "Location is the bin where the part is to be placed. Sorting the parts by bin location before shelving can speed up the whole stock order.",
+          "visual": "Field LOCATION highlights (accent fill) with a Callout. At right a mini scene: five Cartons in random order with location labels shuffle into sorted order (B-01, B-02, B-03, C-01, C-02), then slide onto a PalletRack in a single pass with a fast dotted path.",
+          "onscreen_text": [
+            "Location: bin to place the part",
+            "Sort by location first"
+          ],
+          "hold_seconds": 0,
+          "words": 26,
+          "est_seconds": 11.1
+        },
+        {
+          "id": "s05b04",
+          "narration": "Part Number is the vendor's part number. Verify it against the other parts already on the shelf and against the bin tag at that location.",
+          "visual": "Field PART NUMBER highlights. Mini scene: a Carton labelled '123-A' is held up (Worker pose: inspect) against a bin that holds other '123-A' cartons and a LocationLabel '123-A'. Three matching lines draw between them and a green check.",
+          "onscreen_text": [
+            "Part number: verify against shelf and bin tag"
+          ],
+          "hold_seconds": 0,
+          "words": 25,
+          "est_seconds": 10.7
+        },
+        {
+          "id": "s05b05",
+          "narration": "Pick quantity is the number of pieces for this part on this stock order. Verify it against the parts you actually received. If the quantity does not match, note it on the packing list and give it to the Parts Manager.",
+          "visual": "Field PICK QTY highlights, value '6'. Mini scene: six Part icons counted with a ticking badge, green check. Then a variant: only five parts, the badge turns red '5 of 6'. A PackingSlip appears and a red note 'Qty short' writes on; the slip slides to the PartsManager (Worker variant: manager, pose: stand).",
+          "onscreen_text": [
+            "Pick qty: verify the count",
+            "Mismatch: note on packing list, to Parts Manager"
+          ],
+          "hold_seconds": 0,
+          "words": 41,
+          "est_seconds": 17.6
+        },
+        {
+          "id": "s05b06",
+          "narration": "Description should match the physical part. If the tag says bearing and you received bolts, that is a claim discrepancy. Note it on the packing list for the Parts Manager. Item is the item number on the packing list, for a quick cross check.",
+          "visual": "Field DESCRIPTION highlights, value 'BEARING'. Beside it a Bearing icon with green check, then it swaps to a Bolt icon with red X and the Callout 'Claim discrepancy'. The red note line on the PackingSlip gains a second entry. Then field ITEM highlights and a dotted line connects it to a numbered row on the PackingSlip; both numbers pulse together.",
+          "onscreen_text": [
+            "Description must match the part",
+            "Item: cross check with packing list"
+          ],
+          "hold_seconds": 0,
+          "words": 44,
+          "est_seconds": 18.9
+        },
+        {
+          "id": "s05b07",
+          "narration": "Once the parts are compared to the packing list and placed on the shelf, hand the packing list, with any noted discrepancies, to the Parts Manager.",
+          "visual": "Zoom out: the PickTag shrinks to a corner. Cartons finish sliding onto the PalletRack. Worker (pose: walk, hold-clipboard) carries the PackingSlip, with its two red notes visible, to the PartsManager who takes it with a thumbs-up.",
+          "onscreen_text": [
+            "Compare, shelve, then packing list to Parts Manager"
+          ],
+          "hold_seconds": 0,
+          "words": 26,
+          "est_seconds": 11.1
+        },
+        {
+          "id": "s05b08",
+          "narration": "Order filling works from the pick document. Parts are listed in location sequence, so follow the list and you walk the warehouse once. Filled orders are placed at their destination, Will Call, Shop or Field, or Outbound shipment, and marked.",
+          "visual": "Lower-third: '10. Order Filling'. A PickDocument (PackingSlip variant with five rows, locations ascending) at left. Warehouse Map at right: a dotted route draws through the rows in order as each document row ticks, Worker (pose: push-cart) follows. Three destination zones light up at the map's bottom edge: 'Will Call', 'Shop / Field', 'Outbound'. The filled Carton slides into one zone and a Tag stamps onto it.",
+          "onscreen_text": [
+            "10. Order Filling",
+            "Location sequence",
+            "Will Call  •  Shop / Field  •  Outbound"
+          ],
+          "hold_seconds": 0,
+          "words": 40,
+          "est_seconds": 17.1
+        },
+        {
+          "id": "s05b09",
+          "narration": "If a part or its container appears used, crushed or damaged in any way, inspect it before shipment to verify the customer will receive what is expected. That may mean repackaging.",
+          "visual": "A Carton in the damaged state on the packing bench. Worker (pose: inspect) with magnifier. The carton's contents lift out and drop into a fresh clean Carton, which seals with a tape strip and a green check. Callout: 'Inspect before shipment'.",
+          "onscreen_text": [
+            "Used, crushed or damaged? Inspect first",
+            "Repackage if needed"
+          ],
+          "hold_seconds": 0,
+          "words": 31,
+          "est_seconds": 13.3
+        },
+        {
+          "id": "s05b10",
+          "narration": "When you pull one or more parts from a part stocked in package quantity, empty all the remaining parts into the bin and dispose of the packaging material.",
+          "visual": "Bin close-up: a package of ten Bolt icons. Two bolts lift out to the order Cart. The remaining eight tip out of the package into the bin (loose), the empty package shrinks and drops into a TrashCan icon. Green check. Calm hold for the crossfade.",
+          "onscreen_text": [
+            "Pull from a package: empty the rest into the bin",
+            "Dispose of the packaging"
+          ],
+          "hold_seconds": 2,
+          "words": 28,
+          "est_seconds": 14.0
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "Returns and Inventory Counts",
+      "part": "Part III: Ordering, Returns  /  Part IV: Inventory Counts",
+      "packet_sections": [
+        "11. Parts Returns",
+        "12. Inventory Counts",
+        "Attachment 1: Spare Parts Cycle Count Guidelines"
+      ],
+      "mood": "Careful and attentive. Returns need a cautious tone; the counting procedure is methodical, step by step.",
+      "words": 326,
+      "est_seconds": 143.8,
+      "beats": [
+        {
+          "id": "s06b01",
+          "narration": "Accepting returns from customers is an important part of the business. When processing a credit, first review the condition of the package. Broken packages, broken seals or soiled packages go to the attention of the Parts Manager.",
+          "visual": "Lower-third: '11. Parts Returns'. Returns counter: a Customer icon slides a Carton across. The Carton cycles through three flagged states with red outlines: torn flap ('Broken package'), a broken Seal sticker ('Broken seal'), grey smudges ('Soiled'). Each flagged carton slides toward the PartsManager (Worker variant) at right.",
+          "onscreen_text": [
+            "11. Parts Returns",
+            "Broken package  •  Broken seal  •  Soiled",
+            "To the Parts Manager"
+          ],
+          "hold_seconds": 0,
+          "words": 37,
+          "est_seconds": 15.9
+        },
+        {
+          "id": "s06b02",
+          "narration": "Verify the quantity, description and condition of the parts being returned. Be cautious of cores. It is easy to mistake a core for a new part. And know the return policy for the parts in front of you. The criteria vary by vendor and type of part.",
+          "visual": "Checklist ticks 'Quantity', 'Description', 'Condition'. Then the CoreVsNew asset: two identical-shaped Part icons side by side; the left one is clean and bright with a 'NEW' tag, the right one is dull grey with wear marks and a 'CORE' tag. A magnifier passes over them and the labels flip into view. Finally a PolicyBook icon opens with the words 'Varies by vendor and part type'.",
+          "onscreen_text": [
+            "Verify quantity, description, condition",
+            "Core or new? Look closely",
+            "Return policy varies"
+          ],
+          "hold_seconds": 0,
+          "words": 47,
+          "est_seconds": 20.1
+        },
+        {
+          "id": "s06b03",
+          "narration": "Vendor returns are handled much like filling a customer order, except there may be tags to remove. A vendor return has two portions, shipping back all of a particular part number, and a partial shipment. Pull the return as directed by the Parts Manager.",
+          "visual": "Split view. Left: the order-filling mini map from before, labelled 'Like filling an order'. A Tag on a Part icon is pulled off and fades. Right: two Cartons, one labelled 'All of part 123-A' with a full stack of parts, one labelled 'Partial' with a few. The PartsManager points to each with a Callout 'As directed'.",
+          "onscreen_text": [
+            "Vendor returns: like filling an order",
+            "All of a part number  •  Partial shipment",
+            "Pull as the Parts Manager directs"
+          ],
+          "hold_seconds": 0,
+          "words": 44,
+          "est_seconds": 18.9
+        },
+        {
+          "id": "s06b04",
+          "narration": "Part four, inventory counts. Properly conducting the scheduled cycle counts and the end of year physical count validates how well the company manages its spare parts inventory. Refer to the Inventory Count policy, and take questions to the local Parts or Warehouse Supervisor.",
+          "visual": "SECTION TITLE CARD: 'Part IV' over 'Inventory Counts', sub-line '12. Inventory Counts'. Hold 2 s, wipe up. Reveal: a Calendar asset with weekly 'Cycle count' markers pulsing in sequence and a highlighted 'Year end' marker at the end. A PolicyBook icon labelled 'Inventory Count policy' and the Supervisor variant with a Callout.",
+          "onscreen_text": [
+            "Part IV",
+            "Inventory Counts",
+            "Weekly cycle counts  •  Year end physical count"
+          ],
+          "hold_seconds": 2,
+          "words": 43,
+          "est_seconds": 20.4
+        },
+        {
+          "id": "s06b05",
+          "narration": "If you find a part while counting, note it, and give the part number, description and quantity to the Parts Manager for research.",
+          "visual": "Worker (pose: kneel) at a bin finds a stray Part icon with a question-mark Callout. A CountSheet at right gains a handwritten line with three fields 'P/N', 'Desc', 'Qty' filling in. The sheet slides to the PartsManager with a magnifier badge 'Research'.",
+          "onscreen_text": [
+            "Found part: note P/N, description, qty",
+            "To the Parts Manager for research"
+          ],
+          "hold_seconds": 0,
+          "words": 23,
+          "est_seconds": 9.9
+        },
+        {
+          "id": "s06b06",
+          "narration": "The attached cycle count guidelines add detail. Before the weekly count, all stock is put away and receipted, credit returns are shelved, and orders to be pulled are done. Receive the count report from the Parts Manager, count without viewing the computer on-hands, and write the physical count on the count sheet.",
+          "visual": "Lower-third: 'Attachment 1: Cycle Count Guidelines'. Checklist 'Before you count' ticks three items: 'Stock put away and receipted', 'Credit returns on the shelf', 'Orders pulled'. Then a CountSheet slides from the PartsManager to the Worker. A Terminal beside the Worker shows an on-hands column that gets covered by a grey panel with an eye-slash icon. The Worker (pose: hold-clipboard) writes a number on the CountSheet.",
+          "onscreen_text": [
+            "Before counting: stock put away, credits shelved, orders pulled",
+            "Count without viewing on-hands"
+          ],
+          "hold_seconds": 0,
+          "words": 53,
+          "est_seconds": 22.7
+        },
+        {
+          "id": "s06b07",
+          "narration": "While counting, look around the count area for anything that needs improvement in warehousing practice, and note it on the count sheet to address afterwards. Then enter the counts into the system exactly as counted.",
+          "visual": "Wide shot of a rack bay: the Worker counts; around the bay small issues flicker with soft red outlines (a worn LocationLabel, a carton on the floor). Each gets a small note icon that flies onto a 'Notes' area of the CountSheet. Then the Worker turns to the Terminal, the grey panel lifts and the counted number types into the system.",
+          "onscreen_text": [
+            "Note warehousing issues nearby",
+            "Enter counts as counted"
+          ],
+          "hold_seconds": 0,
+          "words": 35,
+          "est_seconds": 15.0
+        },
+        {
+          "id": "s06b08",
+          "narration": "Items that do not match in on-hand or dollar value go on a recount report. When recounting, take extra care to find the cause. Check the locations in and around the part, and look for credits, stock orders or orders not yet processed.",
+          "visual": "A RecountReport (document variant with a few rows highlighted amber) prints from the Terminal. Worker (pose: inspect) checks the target bin, then the bins left, right, above and below it (highlight sweeps through the neighbours). Three document icons appear as possible causes: 'Credit', 'Stock order', 'Unprocessed order', each with a question mark that resolves to a check. Calm hold for the crossfade.",
+          "onscreen_text": [
+            "Recount: find the cause",
+            "Check nearby locations",
+            "Credits  •  Stock orders  •  Unprocessed orders"
+          ],
+          "hold_seconds": 2,
+          "words": 44,
+          "est_seconds": 20.9
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "Housekeeping and Equipment",
+      "part": "Part V: Maintenance",
+      "packet_sections": [
+        "13. Warehouse Housekeeping",
+        "14. Vehicle and Equipment Maintenance"
+      ],
+      "mood": "Energetic and practical. Checklists move at a steady beat; serious and clear on tag-out.",
+      "words": 334,
+      "est_seconds": 147.1,
+      "beats": [
+        {
+          "id": "s07b01",
+          "narration": "Part five, maintenance, starting with housekeeping. Good housekeeping supports a safe work environment, a professional appearance to those who work in or view the area, efficiency and accuracy in our tasks, and protection of the company's assets.",
+          "visual": "SECTION TITLE CARD: 'Part V' over 'Maintenance', sub-line '13. Warehouse Housekeeping'. Hold 2 s, wipe up. Reveal four icon tiles popping in sequence: Shield with check ('Safe'), Worker in neat pose with a star ('Professional'), Target with arrow ('Efficient and accurate'), PalletRack with a padlock ('Protects assets').",
+          "onscreen_text": [
+            "Part V",
+            "Maintenance",
+            "13. Warehouse Housekeeping",
+            "Safe  •  Professional  •  Efficient  •  Protects assets"
+          ],
+          "hold_seconds": 2,
+          "words": 37,
+          "est_seconds": 17.9
+        },
+        {
+          "id": "s07b02",
+          "narration": "Daily requirements. Floors and dock areas are swept and trash picked up and disposed of. Cabinets and shelves are dusted. All trash cans are emptied at end of shift, and no trash is left in the warehouse after hours.",
+          "visual": "Split: Checklist 'Daily' at left ticks items as named. Right: dock floor with debris specks; the Worker (pose: sweep) with Broom and Dustpan clears a path and the specks disappear. A Cabinet asset gets a duster swipe (dust puffs vanish). A TrashCan tips into a larger Dumpster icon and a Clock reads 'End of shift' with a moon badge.",
+          "onscreen_text": [
+            "Daily: sweep floors and dock",
+            "Dust cabinets and shelves",
+            "Empty trash at end of shift"
+          ],
+          "hold_seconds": 0,
+          "words": 39,
+          "est_seconds": 16.7
+        },
+        {
+          "id": "s07b03",
+          "narration": "Floor areas are kept clear of oil and liquid spots and spills. And the hose press area is cleaned, with excess hose put back in its proper location after each use.",
+          "visual": "A dark Spill puddle on the floor with a red outline; a mop icon wipes it and it shrinks to nothing, green check. Then the HosePress asset (bench with a press head) with a HoseCoil trailing on the floor; the coil winds up and hangs on a wall hook labelled 'Hose'. Checklist ticks the last two items.",
+          "onscreen_text": [
+            "No oil or liquid spills",
+            "Hose press area clean, hose put away"
+          ],
+          "hold_seconds": 0,
+          "words": 31,
+          "est_seconds": 13.3
+        },
+        {
+          "id": "s07b04",
+          "narration": "To prevent untidy conditions, keep empty boxes and bags out of storage locations, and keep trash like coffee cups and cans picked up. Remove banding from the pallet as soon as it is cut and dispose of it, so nobody is cut or trips on it.",
+          "visual": "New Checklist 'Prevent untidy conditions'. A PalletRack bin with an empty, open Carton and a crumpled bag inside: they slide out to a TrashCan. A coffee cup icon and a can icon on a shelf get picked up by the Worker. Then a Pallet with Banding straps: scissors cut, the strap springs loose on the floor with a red trip-hazard outline, the Worker picks it up and bins it, green check.",
+          "onscreen_text": [
+            "Empty boxes and bags out of bins",
+            "Trash picked up",
+            "Cut banding: remove and dispose"
+          ],
+          "hold_seconds": 0,
+          "words": 46,
+          "est_seconds": 19.7
+        },
+        {
+          "id": "s07b05",
+          "narration": "Broken pallets are replaced and thrown away, so a pallet cannot collapse and injure someone. Broken and splintered pieces are disposed of properly. Overflow parts are never stocked on aisle floors; overflow moves to an assigned, marked area. And fire hydrants, door passageways and electrical junction boxes are kept clear and accessible.",
+          "visual": "A Pallet in the broken state (cracked board) under cartons tilts; red X; it swaps for an intact Pallet, green check; splinter pieces drop into a TrashCan. Then an aisle with Cartons on the floor (red outline) slides to a dashed zone labelled 'Overflow' and gets an OverstockTag. Finally three icons in a row, FireHydrant, Doorway, ElectricalPanel, each with a dashed clearance zone that flashes green when a stray carton moves out of it.",
+          "onscreen_text": [
+            "Broken pallets: replace and discard",
+            "No overflow on aisle floors",
+            "Hydrants, doors, junction boxes clear"
+          ],
+          "hold_seconds": 0,
+          "words": 52,
+          "est_seconds": 22.3
+        },
+        {
+          "id": "s07b06",
+          "narration": "Vehicle and equipment maintenance keeps productivity high, operating cost low, and the workplace safe. Operate every piece of equipment with respect for others and for the machine itself. Speed or abuse of equipment is not tolerated.",
+          "visual": "Lower-third: '14. Vehicle and Equipment Maintenance'. Forklift asset drives in from the left at a steady pace and stops. Three badges pop: 'Productivity', 'Lower cost', 'Safety'. Then a quick do/don't: a Forklift with speed lines and a tilted load (red X) versus the steady Forklift (green check).",
+          "onscreen_text": [
+            "14. Vehicle and Equipment Maintenance",
+            "No speed, no abuse"
+          ],
+          "hold_seconds": 0,
+          "words": 36,
+          "est_seconds": 15.4
+        },
+        {
+          "id": "s07b07",
+          "narration": "Daily inspections are conducted, and needed repairs are scheduled by severity. If a repair is safety related, or would sacrifice the health of the machine, the unit is tagged out and not used until the repair is complete. Unsafe equipment is reported to the supervisor immediately.",
+          "visual": "Worker (pose: hold-clipboard) walks around the Forklift; an inspection Checklist ticks. One item turns red ('Brake fault'). A large red TagOut tag ('DO NOT OPERATE') swings onto the Forklift's steering column and the whole Forklift desaturates. The Worker turns to the Supervisor variant with a Callout and an exclamation mark; the Supervisor nods.",
+          "onscreen_text": [
+            "Daily inspection",
+            "Safety related? Tag out",
+            "Report unsafe equipment immediately"
+          ],
+          "hold_seconds": 0,
+          "words": 46,
+          "est_seconds": 19.7,
+          "delivery": "Serious and clear on 'tagged out'."
+        },
+        {
+          "id": "s07b08",
+          "narration": "Vehicles are kept clean inside and out. Before operating one, complete a visual inspection and report any damage to your supervisor. If the tank is below half full, fill it, so the next person gets a quick start. Everyone is task trained on the equipment they use.",
+          "visual": "A simple Vehicle asset (van or pickup outline). Sparkle marks appear on it ('Clean'). The Worker walks a dotted circle around it ('Visual inspection'), a small dent gets a red note that flies to the Supervisor. A FuelGauge asset: the needle sits just under the half mark (red zone below half), a fuel nozzle icon fills it to full, green check. Finally a 'Task trained' badge with a check settles on the Worker. Calm hold.",
+          "onscreen_text": [
+            "Clean inside and out",
+            "Visual inspection before use",
+            "Below half a tank? Fill it",
+            "Task trained"
+          ],
+          "hold_seconds": 2,
+          "words": 47,
+          "est_seconds": 22.1
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "Attitude and Safety",
+      "part": "Part V: Maintenance  /  Part VI: Safety",
+      "packet_sections": [
+        "15. Personal Improvement",
+        "16. Warehouse Safety",
+        "17. General Safety Practices"
+      ],
+      "mood": "Open the attitude section warmly and personally; shift to steady, serious authority for safety without becoming stern.",
+      "words": 362,
+      "est_seconds": 159.1,
+      "beats": [
+        {
+          "id": "s08b01",
+          "narration": "One more factor in your success is your own attitude, toward your job, your fellow workers, your customers and the company's goals. A good attitude is contagious. It builds relationships with customers and co-workers that help everyone succeed. Your attitude is yours to own and manage.",
+          "visual": "Lower-third: '15. Personal Improvement'. Worker (pose: thumbs-up) centre. Soft rings radiate outward from the Worker and reach three other Worker silhouettes and a Customer icon; as each ring touches them they switch to thumbs-up poses. A Callout: 'Yours to own and manage'.",
+          "onscreen_text": [
+            "15. Personal Improvement",
+            "A good attitude is contagious",
+            "Yours to own and manage"
+          ],
+          "hold_seconds": 0,
+          "words": 47,
+          "est_seconds": 20.1,
+          "delivery": "Warm, personal."
+        },
+        {
+          "id": "s08b02",
+          "narration": "Your appearance sends a message too. Keep it neat and clean, and avoid wearing anything that could be hazardous around machinery. Keep growing your knowledge of the profession, notice changes in the business, and find better ways to do the work. And tell your supervisor your career goals, so you can plan the skills you need.",
+          "visual": "Four tiles appear in sequence. Tile 1: Worker in neat pose with a green check, and beside it a dangling loose item (scarf or lanyard) near a gear with a red X. Tile 2: an open Book icon with a rising line chart ('Keep learning'). Tile 3: a lightbulb over a PalletRack ('Find better ways'). Tile 4: Worker and Supervisor with a shared Callout showing a small ladder of steps ('Career plan').",
+          "onscreen_text": [
+            "Neat and clean",
+            "Nothing hazardous near machinery",
+            "Keep learning",
+            "Share your career goals"
+          ],
+          "hold_seconds": 0,
+          "words": 56,
+          "est_seconds": 24.0
+        },
+        {
+          "id": "s08b03",
+          "narration": "Part six, safety. Safety is everyone's responsibility, and every employee is expected to work safely. Attending the weekly safety meeting, completing annual refresher training, and wearing the proper personal protective equipment are expectations, not options.",
+          "visual": "SECTION TITLE CARD: 'Part VI' over 'Safety', sub-line '16. Warehouse Safety', with a thin yellow-and-black hazard stripe along the bottom edge. Hold 2 s, wipe up. Reveal three tiles: Calendar with a weekly marker ('Weekly safety meeting'), Certificate icon with a '1 year' loop arrow ('Annual refresher'), and the PPE set (hard hat, safety glasses, gloves, hi-vis vest, boots) assembling onto the Worker.",
+          "onscreen_text": [
+            "Part VI",
+            "Safety",
+            "Weekly safety meeting",
+            "Annual refresher training",
+            "Proper PPE"
+          ],
+          "hold_seconds": 2,
+          "words": 35,
+          "est_seconds": 17.0,
+          "delivery": "Steady, authoritative, not stern."
+        },
+        {
+          "id": "s08b04",
+          "narration": "Know how to safely operate every tool and piece of equipment. Serious injury can come from improper lifting, so follow the guidelines for bending, lifting and twisting when moving parts, and ask for assistance when a lift exceeds what should be expected.",
+          "visual": "Tool icons row (Broom, BoxCutter, tape gun, hand truck) with a check each. Then DoDontPanel: left, Worker in lift-bad pose (bent back, straight legs, twisting arrow) with a red X and a red flash at the lower back; right, Worker in lift-bent-knees pose, carton close to body, green check. Then a heavy Carton with two Workers lifting together, labelled 'Ask for assistance'.",
+          "onscreen_text": [
+            "Know your tools",
+            "Lift with bent knees, no twisting",
+            "Heavy? Ask for assistance"
+          ],
+          "hold_seconds": 0,
+          "words": 42,
+          "est_seconds": 18.0
+        },
+        {
+          "id": "s08b05",
+          "narration": "Forklifts and other material handling equipment require proper training in their operating practices, and only authorised employees operate equipment or vehicles. Improper use of hand tools is one of the largest causes of warehouse injuries, so use caution with box cutters and knives.",
+          "visual": "Forklift with a Worker wearing an 'Authorised' badge (green check) and a second Worker without a badge stepping toward it, stopped by a red X. Then a BoxCutter icon large in frame: the blade retracts into the handle with a click and a 'Caution' label; a cutting stroke animates away from the body with a green arrow, and a stroke toward the body shows a red X.",
+          "onscreen_text": [
+            "Trained and authorised only",
+            "Box cutters and knives: use caution"
+          ],
+          "hold_seconds": 0,
+          "words": 43,
+          "est_seconds": 18.4
+        },
+        {
+          "id": "s08b06",
+          "narration": "Parts classified as hazardous material require special stocking, shipping and handling. Be familiar with the Hazardous Material Safety Data Sheets and the proper stocking practices. Building hydraulic hoses also requires specific training on hose presses, hose saws and stocking hydraulic parts. Training will be provided in all of these areas.",
+          "visual": "A Carton with a HazardSign diamond placard on its side sits in a dedicated bay marked with a hazard stripe. A SDS document icon labelled 'Safety Data Sheet' slides out of a wall holder. Then the HosePress and a HoseSaw icon with a 'Training required' badge. Finally a Certificate icon with the words 'Specific training provided' and a check.",
+          "onscreen_text": [
+            "Hazardous material: special handling",
+            "Know the Safety Data Sheets",
+            "Hose press and hose saw: specific training"
+          ],
+          "hold_seconds": 0,
+          "words": 50,
+          "est_seconds": 21.4
+        },
+        {
+          "id": "s08b07",
+          "narration": "Some general rules. No horseplay. Observe all safety and traffic signs. Keep unauthorised personnel out of designated areas. Good housekeeping is part of the job. Tools, equipment and materials are kept in good working order, and anything damaged or broken is removed from service.",
+          "visual": "Lower-third: '17. General Safety Practices'. A tall Checklist card at left ticks each rule as named. At right, a quick icon for each: two Workers shoving with a red X; a TrafficSign (stop sign and a pedestrian-crossing floor marking) with a check; a dashed 'Authorised only' zone with an outsider stopped; the Broom; a cracked hand tool sliding into a 'Removed from service' bin.",
+          "onscreen_text": [
+            "17. General Safety Practices",
+            "No horseplay",
+            "Observe signs",
+            "Authorised areas only",
+            "Good housekeeping",
+            "Damaged tools removed"
+          ],
+          "hold_seconds": 0,
+          "words": 44,
+          "est_seconds": 18.9,
+          "delivery": "Even list rhythm."
+        },
+        {
+          "id": "s08b08",
+          "narration": "The right personal safety equipment is used for each task, and it is the supervisor's responsibility to provide it. Equipment or vehicles being repaired are locked out and tagged out. And every employee must know the location, operation and proper use of the emergency equipment.",
+          "visual": "Checklist continues with three items. Icons: the Supervisor hands PPE items to the Worker; the Forklift with the TagOut tag plus a padlock icon ('Locked out, tagged out'); then a wall panel with a FireExtinguisher, an EyeWash station and a first-aid cross, each pinging with a location marker on a mini Warehouse Map. Calm hold on the completed checklist.",
+          "onscreen_text": [
+            "Supervisor provides PPE",
+            "Locked out, tagged out",
+            "Know your emergency equipment"
+          ],
+          "hold_seconds": 2,
+          "words": 45,
+          "est_seconds": 21.3
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "Recap and Knowledge Check",
+      "part": "Closing",
+      "packet_sections": [
+        "Recap of Parts I to VI",
+        "Knowledge check",
+        "Closing"
+      ],
+      "mood": "Encouraging quiz-master tone. Give each question a genuine pause, then answer with confidence. Finish warmly.",
+      "words": 341,
+      "est_seconds": 168.1,
+      "beats": [
+        {
+          "id": "s09b01",
+          "narration": "Let's recap. Receive, store and ship. Order, fill and return. Count. Maintain. Stay safe.",
+          "visual": "Navy background. The ProgressTimeline from the opening returns across the centre with six part nodes; each lights in sequence with its icon (BoxTruck and PalletRack, PickTag, CountSheet, Broom and Forklift, HazardSign) as the narrator names it. Short hold.",
+          "onscreen_text": [
+            "Receive, store, ship",
+            "Order, fill, return",
+            "Count",
+            "Maintain",
+            "Stay safe"
+          ],
+          "hold_seconds": 2,
+          "words": 14,
+          "est_seconds": 8.0
+        },
+        {
+          "id": "s09b02",
+          "narration": "Quick check. A truck backs up to the dock. What must happen before unloading begins? Its wheels are chocked. No exception.",
+          "visual": "QuizCard: question text at top, a small BoxTruck at the DockDoor illustration beneath. A thinking pause with three dots pulsing (the hold falls between the question and the answer). Then the WheelChock slides in and the answer line appears with a green check and the 'NO EXCEPTION' stamp.",
+          "onscreen_text": [
+            "Before unloading?",
+            "Wheels chocked. No exception."
+          ],
+          "hold_seconds": 2.5,
+          "words": 21,
+          "est_seconds": 11.5,
+          "delivery": "Pause after the question for about three seconds before answering (the hold plus the clip gap)."
+        },
+        {
+          "id": "s09b03",
+          "narration": "An emergency order has just arrived. How long do you have to check it in? Two hours. Stock orders have twenty-four.",
+          "visual": "QuizCard with two dim Clock/Timer icons. Pause with dots. The red timer fills to '2 h' and the answer appears; the blue timer fills to '24 h' as the second sentence lands.",
+          "onscreen_text": [
+            "Check in an emergency order within?",
+            "2 hours (stock orders: 24 hours)"
+          ],
+          "hold_seconds": 2.5,
+          "words": 22,
+          "est_seconds": 11.9,
+          "delivery": "Pause after the question before answering."
+        },
+        {
+          "id": "s09b04",
+          "narration": "You find a worn, partly missing bin label. What do you do? Replace it. Every bin is clearly marked with the correct part number.",
+          "visual": "QuizCard with a LocationLabel in the worn state. Pause with dots. The worn label peels away and a crisp label slides in, green check, answer text appears.",
+          "onscreen_text": [
+            "Worn bin label?",
+            "Replace it. Correct part number, clearly marked."
+          ],
+          "hold_seconds": 2.5,
+          "words": 24,
+          "est_seconds": 12.8,
+          "delivery": "Pause after the question before answering."
+        },
+        {
+          "id": "s09b05",
+          "narration": "A forklift has a safety related fault. What happens? It is tagged out, not used until the repair is complete, and reported to the supervisor immediately.",
+          "visual": "QuizCard with the Forklift. Pause with dots. The red TagOut tag swings on, the Forklift desaturates, and a Callout arrow runs to the Supervisor icon. Answer text appears.",
+          "onscreen_text": [
+            "Safety related fault?",
+            "Tag out. Do not use. Report immediately."
+          ],
+          "hold_seconds": 2.5,
+          "words": 26,
+          "est_seconds": 13.6,
+          "delivery": "Pause after the question before answering."
+        },
+        {
+          "id": "s09b06",
+          "narration": "You pull two parts from a package of ten. What happens to the other eight? They are emptied into the bin, and the packaging is disposed of.",
+          "visual": "QuizCard with a package of ten Bolt icons in a bin. Pause with dots. Two bolts leave to a Cart, eight tip out loose into the bin, the empty package drops into the TrashCan. Answer text appears.",
+          "onscreen_text": [
+            "Pulled 2 of a package of 10?",
+            "Empty the rest into the bin. Dispose of the packaging."
+          ],
+          "hold_seconds": 2.5,
+          "words": 27,
+          "est_seconds": 14.1,
+          "delivery": "Pause after the question before answering."
+        },
+        {
+          "id": "s09b06a",
+          "narration": "You are packing a customer order and the carton is getting heavy. As a general rule, what is the most a single carton should weigh? Fifty pounds. It can vary with the size, shape and dimensions of the part, and the carton must stay safe and easy to handle.",
+          "visual": "QuizCard: question text at top, a Carton on the Scale asset beneath with the needle at rest. ThinkingDots pulse during the hold. Then the needle climbs and stops just under the red line, the '50 lb' badge appears in `correct`, and the Worker (pose: lift-bent-knees) lifts the carton. Answer chip slides up.",
+          "onscreen_text": [
+            "Most a single carton should weigh?",
+            "General rule: 50 lb. Varies with size, shape, dimensions."
+          ],
+          "hold_seconds": 2.5,
+          "words": 49,
+          "est_seconds": 21.4,
+          "pace_wpm": 163,
+          "includes_clip_gap": 0.9,
+          "delivery": "Pause after the question for about three seconds before answering (the hold plus the clip gap)."
+        },
+        {
+          "id": "s09b06b",
+          "narration": "A pick tag says bearing, but the box you received holds bolts. What do you do? That is a claim discrepancy. Note it on the packing list, and give the packing list to the Parts Manager.",
+          "visual": "QuizCard: the PickTag asset with the DESCRIPTION field highlighted reading 'BEARING', and beside it an open Carton showing Bolt icons with a red X. ThinkingDots pulse during the hold. Then a PackingSlip appears, a red handwritten note writes on, and the slip slides to the PartsManager (Worker variant: manager) who takes it with a thumbs-up. Answer chip slides up.",
+          "onscreen_text": [
+            "Tag says bearing, box holds bolts?",
+            "Claim discrepancy. Note on packing list, give to Parts Manager."
+          ],
+          "hold_seconds": 2.5,
+          "words": 36,
+          "est_seconds": 16.7,
+          "pace_wpm": 163,
+          "includes_clip_gap": 0.9,
+          "delivery": "Pause after the question for about three seconds before answering (the hold plus the clip gap)."
+        },
+        {
+          "id": "s09b06c",
+          "narration": "You are about to do a weekly cycle count. Should you look at the computer on-hands first? No. Count without viewing the on-hands, write the physical count on the count sheet, and enter it into the system exactly as counted.",
+          "visual": "QuizCard: a Terminal showing an on-hands table beside a PalletRack bin with Part icons and a CountSheet. ThinkingDots pulse during the hold. Then the grey covered panel with the eye-slash icon drops over the on-hands column, the Worker (pose: hold-clipboard) counts the bin (counter badge ticks) and writes on the CountSheet, then the number types into the Terminal. Answer chip slides up.",
+          "onscreen_text": [
+            "Check the computer on-hands before counting?",
+            "No. Count first, note it on the count sheet, enter as counted."
+          ],
+          "hold_seconds": 2.5,
+          "words": 42,
+          "est_seconds": 18.9,
+          "pace_wpm": 163,
+          "includes_clip_gap": 0.9,
+          "delivery": "Pause after the question for about three seconds before answering (the hold plus the clip gap)."
+        },
+        {
+          "id": "s09b06d",
+          "narration": "A carton is heavier than you expected. How do you move it safely? Follow the lifting guidelines for bending, lifting and twisting, and ask for assistance when the lift exceeds what should be expected. Serious injury can come from improper lifting.",
+          "visual": "QuizCard: a heavy Carton on the floor beside the Worker (pose: stand). ThinkingDots pulse during the hold. Then a quick DoDontPanel in miniature: Worker in lift-bad pose with the red flash and red X at left, Worker in lift-bent-knees pose with a green check at right; a second Worker joins to lift together with the label 'Ask for assistance'. Answer chip slides up.",
+          "onscreen_text": [
+            "Heavy carton. How do you move it?",
+            "Follow the lifting guidelines. Ask for assistance."
+          ],
+          "hold_seconds": 2.5,
+          "words": 41,
+          "est_seconds": 18.5,
+          "pace_wpm": 163,
+          "includes_clip_gap": 0.9,
+          "delivery": "Pause after the question for about three seconds before answering (the hold plus the clip gap)."
+        },
+        {
+          "id": "s09b07",
+          "narration": "Thank you for taking the time to learn how this warehouse runs. Accuracy and timeliness in your work keep the inventory credible and our customers' machines running. When a question comes up, visit your supervisor. Welcome to the team.",
+          "visual": "CLOSING CARD. The line-art Warehouse Map from the opening redraws. The Worker (pose: wave) stands in front with the Supervisor beside, both with thumbs-up on 'Welcome to the team'. Title 'Warehouse Training Packet' returns above, with the sub-line 'Questions? Ask your supervisor.' Hold on the final frame for the fade-out.",
+          "onscreen_text": [
+            "Warehouse Training Packet",
+            "Questions? Ask your supervisor."
+          ],
+          "hold_seconds": 4,
+          "words": 39,
+          "est_seconds": 20.7,
+          "delivery": "Warm and conclusive; slow down on the last line."
+        }
+      ]
+    }
+  ]
+}

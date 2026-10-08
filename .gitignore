@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+__pycache__/
+*.pyc
+template/build/
+template/out/
+template/web/timing.js
+template/web/scenes/
+jobs/
+.env
+*.env
