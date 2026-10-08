@@ -39,6 +39,9 @@ if [ -f "$HOME/.config/doc2vid/tunnel-token" ]; then labels="$labels com.albinil
 for label in $labels; do
   plist="$HOME/Library/LaunchAgents/$label.plist"
   launchctl bootout "$DOMAIN/$label" >/dev/null 2>&1 || true
+  # bootout returns before the job is fully removed; bootstrapping too early fails with "Input/output error".
+  tries=0
+  while launchctl print "$DOMAIN/$label" >/dev/null 2>&1 && [ "$tries" -lt 50 ]; do sleep 0.2; tries=$((tries + 1)); done
   launchctl bootstrap "$DOMAIN" "$plist"
   launchctl kickstart -k "$DOMAIN/$label"
 done
