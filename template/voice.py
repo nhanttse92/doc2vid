@@ -2,7 +2,7 @@
 all through OpenRouter. Adapted from ~/Projects/papers-video/rqvae/voice.py.
 
 The API key comes from OPENROUTER_API_KEY, or else from the env file named by
-OPENROUTER_ENV_FILE (default: the Lizzy backend's .env). It is never printed or logged.
+OPENROUTER_ENV_FILE. It is never printed or logged.
 """
 
 import base64
@@ -22,19 +22,25 @@ API = "https://openrouter.ai/api/v1"
 TTS_MODEL = "google/gemini-3.8-flash-tts"
 EAR_MODEL = "google/gemini-3.8-flash"
 MUSIC_MODEL = "google/lyria-3-pro-preview"
-DEFAULT_ENV_FILE = Path.home() / "Projects/lizzy/app/backend/.env"
 
 
 def _key():
     k = os.environ.get("OPENROUTER_API_KEY")
     if k:
         return k
-    path = Path(os.environ.get("OPENROUTER_ENV_FILE", DEFAULT_ENV_FILE))
+    name = os.environ.get("OPENROUTER_ENV_FILE")
+    if not name:
+        raise RuntimeError("Set OPENROUTER_API_KEY or OPENROUTER_ENV_FILE to a dotenv file")
+    path = Path(name)
+    if not path.is_file():
+        raise RuntimeError(f"OPENROUTER_ENV_FILE does not exist: {path}")
     for line in path.read_text().splitlines():
         m = re.match(r"\s*(?:export\s+)?OPENROUTER_API_KEY\s*=\s*(.*)", line)
         if m:
-            return m.group(1).strip().strip("'\"")
-    raise RuntimeError(f"OPENROUTER_API_KEY not set and not found in {path}")
+            value = m.group(1).strip().strip("'\"")
+            if value:
+                return value
+    raise RuntimeError(f"OPENROUTER_API_KEY not found in {path}")
 
 
 def _open(path, body, timeout):

@@ -5,17 +5,26 @@
 // Prints any page errors. Times may be beat ids (frame at 60% of the beat's slot).
 import { chromium } from 'playwright';
 import { execFileSync } from 'node:child_process';
-import { mkdir, readFile } from 'node:fs/promises';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { mkdir, readFile, access } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 
-const root = path.dirname(fileURLToPath(import.meta.url));
+const root = process.cwd();
 const [query, times = '0', ...flags] = process.argv.slice(2);
+if (!query || !/^(scene=s\d{2}|kit=[a-z]+)$/.test(query)) { console.error('usage: node shoot.mjs "scene=s01" <times> [--sheet] [--full]'); process.exit(1); }
 const full = flags.includes('--full'), sheet = flags.includes('--sheet');
 const scale = full ? 1 : 0.5;
-const timing = JSON.parse((await readFile(path.join(root, 'web/timing.js'), 'utf8')).replace(/^[\s\S]*?window\.TIMING = /, '').replace(/;\s*$/, ''));
+let timing;
+try {
+  timing = JSON.parse((await readFile(path.join(root, 'web/timing.js'), 'utf8')).replace(/^[\s\S]*?window\.TIMING = /, '').replace(/;\s*$/, ''));
+} catch (e) { console.error(`web/timing.js missing or invalid: ${e.message}`); process.exit(1); }
+const sceneId = new URLSearchParams(query).get('scene');
+const target = sceneId ? `web/scenes/${sceneId}.js` : `web/kit/${new URLSearchParams(query).get('kit')}.gallery.js`;
+try { await access(path.join(root, target)); }
+catch { console.error(`missing ${target}`); process.exit(1); }
 const beats = Object.fromEntries(timing.scenes.flatMap(s => s.beats.map(b => [b.id, b])));
 const at = times.split(',').map(x => (beats[x] ? beats[x].start + beats[x].slot * 0.6 : Number(x)));
+if (at.some(t => !Number.isFinite(t) || t < 0)) { console.error(`invalid time or beat id: ${times}`); process.exit(1); }
 const name = new URLSearchParams(query).get('scene') || `kit-${new URLSearchParams(query).get('kit')}`;
 const dir = path.join(root, 'build/shots');
 await mkdir(dir, { recursive: true });

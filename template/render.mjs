@@ -9,24 +9,38 @@
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { mkdir, readFile } from 'node:fs/promises';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { mkdir, readFile, access } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import os from 'node:os';
 
-const root = path.dirname(fileURLToPath(import.meta.url));
+const root = process.cwd();
 const args = process.argv.slice(2);
 const draft = args.includes('--draft'), stills = args.includes('--stills');
-const timing = JSON.parse((await readFile(path.join(root, 'web/timing.js'), 'utf8')).replace(/^[\s\S]*?window\.TIMING = /, '').replace(/;\s*$/, ''));
+let timing;
+try {
+  timing = JSON.parse((await readFile(path.join(root, 'web/timing.js'), 'utf8')).replace(/^[\s\S]*?window\.TIMING = /, '').replace(/;\s*$/, ''));
+} catch (e) { console.error(`web/timing.js missing or invalid: ${e.message}`); process.exit(1); }
 const ids = args.filter(a => !a.startsWith('--'));
+if (ids.some(id => !/^s\d{2}$/.test(id) || !timing.scenes.some(s => s.id === id))) {
+  console.error(`unknown scene id: ${ids.find(id => !timing.scenes.some(s => s.id === id))}`);
+  process.exit(1);
+}
 const scenes = timing.scenes.filter(s => !ids.length || ids.includes(s.id));
-const JOBS = Number(process.env.JOBS || Math.max(2, Math.min(8, os.cpus().length - 4)));
+for (const scene of scenes) {
+  try { await access(path.join(root, 'web/scenes', `${scene.id}.js`)); }
+  catch { console.error(`missing web/scenes/${scene.id}.js`); process.exit(1); }
+}
+const JOBS = Number(process.env.JOBS || Math.max(1, Math.min(4, os.cpus().length - 2)));
+if (!Number.isInteger(JOBS) || JOBS < 1) { console.error('JOBS must be a positive integer'); process.exit(1); }
 const fps = draft ? 15 : timing.fps;
 const scale = draft ? 0.5 : 1;
 
 async function renderScene(scene) {
   const browser = await chromium.launch({ args: ['--force-color-profile=srgb', '--font-render-hinting=none'] });
+  let ffmpeg;
   try {
+    console.log(`${scene.id}: rendering ${draft ? 'draft ' : ''}${Math.round(scene.duration * fps)} frames`);
     const page = await browser.newPage({ viewport: { width: 1920 * scale, height: 1080 * scale }, deviceScaleFactor: 1 });
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
@@ -54,7 +68,7 @@ async function renderScene(scene) {
 
     const out = path.join(root, draft ? 'build/draft' : 'build/video', `${scene.id}.mp4`);
     await mkdir(path.dirname(out), { recursive: true });
-    const ffmpeg = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-',
+    ffmpeg = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-',
       '-c:v', 'libx264', '-preset', draft ? 'veryfast' : 'medium', '-crf', draft ? '26' : '16', '-pix_fmt', 'yuv420p',
       '-r', String(fps), '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
     const frames = Math.round(scene.duration * fps);
@@ -69,6 +83,10 @@ async function renderScene(scene) {
     if (code !== 0) throw new Error(`${scene.id}: ffmpeg exited ${code}`);
     return { id: scene.id, frames, seconds: Math.round((Date.now() - started) / 1000), out: path.relative(root, out) };
   } finally {
+    if (ffmpeg && ffmpeg.exitCode === null) {
+      ffmpeg.stdin.destroy();
+      ffmpeg.kill('SIGTERM');
+    }
     await browser.close();
   }
 }
@@ -81,7 +99,8 @@ await Promise.all(Array.from({ length: Math.min(JOBS, queue.length) }, async () 
     try {
       const r = await renderScene(scene);
       results.push(r);
-      console.log(JSON.stringify(r));
+      console.log(r.stills ? `${r.id}: ${r.stills} stills` :
+        `${r.id}: ${r.frames} frames in ${r.seconds}s -> ${r.out}`);
     } catch (e) {
       failed = true;
       console.error(`FAILED ${scene.id}: ${e.message}`);

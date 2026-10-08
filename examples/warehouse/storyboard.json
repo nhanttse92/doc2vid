@@ -2,6 +2,7 @@
   "meta": {
     "title": "Warehouse Training Packet",
     "target_seconds": 1200,
+    "audience": "new warehouse employees",
     "words_per_minute": 140,
     "total_words": 2802,
     "est_total_seconds": 1254.7,
@@ -50,6 +51,7 @@
     {
       "id": "s01",
       "title": "Welcome and Purpose",
+      "music": "m01",
       "part": "Part I: Purpose",
       "packet_sections": [
         "1. Purpose of Warehouse Training Packet",
@@ -142,6 +144,7 @@
     {
       "id": "s02",
       "title": "Receiving of Freight",
+      "music": "m02",
       "part": "Part II: Receiving, Storing, Shipping",
       "packet_sections": [
         "3. Receiving of Freight"
@@ -259,8 +262,7 @@
             "Sign",
             "Sort",
             "Check in",
-            "Document",
-            "File"
+            "Document  •  File"
           ],
           "hold_seconds": 3,
           "words": 15,
@@ -272,6 +274,7 @@
     {
       "id": "s03",
       "title": "Packaging and Storing of Parts",
+      "music": "m02",
       "part": "Part II: Receiving, Storing, Shipping",
       "packet_sections": [
         "4. Packaging of Parts",
@@ -412,6 +415,7 @@
     {
       "id": "s04",
       "title": "Locations, Mezzanine, Packing and Shipping",
+      "music": "m02",
       "part": "Part II: Receiving, Storing, Shipping",
       "packet_sections": [
         "6. Warehouse Location System",
@@ -513,6 +517,7 @@
     {
       "id": "s05",
       "title": "Stock Orders and Order Filling",
+      "music": "m02",
       "part": "Part III: Ordering, Returns",
       "packet_sections": [
         "9. Stock Order Processing",
@@ -647,6 +652,7 @@
     {
       "id": "s06",
       "title": "Returns and Inventory Counts",
+      "music": "m02",
       "part": "Part III: Ordering, Returns  /  Part IV: Inventory Counts",
       "packet_sections": [
         "11. Parts Returns",
@@ -763,6 +769,7 @@
     {
       "id": "s07",
       "title": "Housekeeping and Equipment",
+      "music": "m03",
       "part": "Part V: Maintenance",
       "packet_sections": [
         "13. Warehouse Housekeeping",
@@ -882,6 +889,7 @@
     {
       "id": "s08",
       "title": "Attitude and Safety",
+      "music": "m03",
       "part": "Part V: Maintenance  /  Part VI: Safety",
       "packet_sections": [
         "15. Personal Improvement",
@@ -1009,6 +1017,7 @@
     {
       "id": "s09",
       "title": "Recap and Knowledge Check",
+      "music": "m01",
       "part": "Closing",
       "packet_sections": [
         "Recap of Parts I to VI",
