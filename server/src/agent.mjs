@@ -75,7 +75,8 @@ export async function runAgent({ role, scene, cwd, prompt, model, resume, timeou
 export async function fakeAgent({ role, scene, cwd, resume, onEvent }) {
   const sessionId = resume || `fake-${role}-${scene || 'director'}`;
   if (role === 'storyboard') {
-    const fixture = new URL('../test/fixtures/storyboard.json', import.meta.url);
+    // The integration test points this at the template's validated example; unit tests use the small fixture.
+    const fixture = process.env.DOC2VID_FAKE_STORYBOARD || new URL('../test/fixtures/storyboard.json', import.meta.url);
     await writeFile(path.join(cwd, 'storyboard.json'), await readFile(fixture));
     onEvent({ type: 'say', msg: `${sessionId}-1`, role, delta: 'Planning ' });
     onEvent({ type: 'say', msg: `${sessionId}-1`, role, delta: 'complete.' });

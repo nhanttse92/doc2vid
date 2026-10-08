@@ -295,6 +295,8 @@ test('restart repairs a partial event append and continues sequence numbers', as
 });
 
 test('optional real-template offline integration', { skip: process.env.DOC2VID_INTEGRATION !== '1' }, async t => {
+  process.env.DOC2VID_FAKE_STORYBOARD = fileURLToPath(new URL('../../examples/mini/storyboard.json', import.meta.url));
+  t.after(() => { delete process.env.DOC2VID_FAKE_STORYBOARD; });
   const root = await mkdtemp(path.join(tmpdir(), 'doc2vid-integration-'));
   const template = fileURLToPath(new URL('../../template/', import.meta.url));
   const config = {
