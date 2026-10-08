@@ -11,8 +11,10 @@ build/narration.json, which timing.py turns into the beat timeline the scenes an
 
 import argparse
 import json
+import os
 import re
 import sys
+import wave
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -26,7 +28,7 @@ CHECK = (
     "Reply as JSON only, no markdown: "
     '{{"matches": true/false (ignore number formatting such as 24 vs twenty-four), '
     '"differences": [words missing, added, or changed], '
-    '"clarity": 1-10 (easy to follow for a new warehouse employee), '
+    '"clarity": 1-10 (easy to follow for {audience}), '
     '"naturalness": 1-10 (10 = indistinguishable from a real person talking, 1 = robotic text-to-speech), '
     '"issues": "artifacts, mispronunciations, odd pauses, rushed or sing-song delivery, or an empty string"}}'
 )
@@ -47,11 +49,11 @@ def beats(sb, only=()):
                 yield scene["id"], beat["id"], " ".join(beat["narration"].split()), style
 
 
-def audited(wav, text):
+def audited(wav, text, audience):
     path = wav.with_suffix(".json")
     if path.exists():
         return json.loads(path.read_text())
-    raw = voice.listen(wav, CHECK.format(text=text))
+    raw = voice.listen(wav, CHECK.format(text=text, audience=audience))
     try:
         v = json.loads(re.sub(r"^```(json)?|```$", "", raw.strip(), flags=re.M))
     except json.JSONDecodeError:
@@ -66,9 +68,27 @@ def rank(v):
 
 
 def take(job):
-    (scene, beat, text, style), n, speaker = job
+    (scene, beat, text, style), n, speaker, audience = job
     wav = voice.synth(text, style, speaker, take=n)
-    return beat, n, wav, audited(wav, text)
+    return beat, n, wav, audited(wav, text, audience)
+
+
+def offline_take(item, speaker):
+    scene, beat, text, style = item
+    cached = voice.clip_path(text, style, speaker)
+    wav = cached.with_name(f"{cached.stem}_offline.wav")
+    wav.parent.mkdir(parents=True, exist_ok=True)
+    seconds = len(text.split()) / 163 * 60 + 0.3
+    frames = round(seconds * 44100)
+    if not wav.exists() or abs(voice.wav_duration(wav) - seconds) > 1 / 44100:
+        with wave.open(str(wav), "wb") as out:
+            out.setnchannels(1)
+            out.setsampwidth(2)
+            out.setframerate(44100)
+            out.writeframes(bytes(frames * 2))
+    return beat, {"scene": scene, "text": text, "take": 0,
+                  "wav": str(wav.relative_to(HERE)), "duration": frames / 44100,
+                  "matches": True, "clarity": 0, "naturalness": 0}
 
 
 def main():
@@ -80,17 +100,31 @@ def main():
     speaker = sb["meta"]["voice"]
     items = list(beats(sb, set(args.scenes)))
     chosen = json.loads(OUT.read_text()) if OUT.exists() else {}
+    current = {beat["id"] for scene in sb["scenes"] for beat in scene["beats"]}
+    chosen = {key: value for key, value in chosen.items() if key in current}
 
     if not args.report:
-        jobs = [(item, n, speaker) for item in items for n in range(MAX_TAKES)]
-        with ThreadPoolExecutor(10) as pool:
-            results = list(pool.map(take, jobs))
-        by_beat = {}
-        for beat, n, wav, v in results:
-            by_beat.setdefault(beat, []).append((rank(v), -n, n, wav, v))
-        for scene, beat, text, _ in items:
-            _, _, n, wav, v = max(by_beat[beat])
-            chosen[beat] = {"scene": scene, "text": text, "take": n, "wav": str(wav.relative_to(HERE)), **v}
+        if os.environ.get("DOC2VID_OFFLINE") == "1":
+            for item in items:
+                beat, entry = offline_take(item, speaker)
+                chosen[beat] = entry
+        else:
+            try:
+                voice._key()  # fail before starting any concurrent synthesis
+            except RuntimeError as exc:
+                sys.exit(str(exc))
+            jobs = [(item, n, speaker, sb["meta"].get("audience", "a new employee"))
+                    for item in items for n in range(MAX_TAKES)]
+            with ThreadPoolExecutor(10) as pool:
+                results = list(pool.map(take, jobs))
+            by_beat = {}
+            for beat, n, wav, v in results:
+                by_beat.setdefault(beat, []).append((rank(v), -n, n, wav, v))
+            for scene, beat, text, _ in items:
+                _, _, n, wav, v = max(by_beat[beat])
+                chosen[beat] = {"scene": scene, "text": text, "take": n,
+                                "wav": str(wav.relative_to(HERE)), **v}
+        OUT.parent.mkdir(parents=True, exist_ok=True)
         OUT.write_text(json.dumps(chosen, indent=1))
 
     rows = [chosen[b] for _, b, _, _ in items if b in chosen]

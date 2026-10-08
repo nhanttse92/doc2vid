@@ -19,28 +19,35 @@ LEAD_IN, GAP, TAIL = 1.5, 1.0, 2.2
 
 def build():
     sb = json.loads((HERE / "storyboard.json").read_text())
+    settings = sb["meta"].get("timing", {})
+    fps = int(settings.get("fps", FPS))
+    lead_in = float(settings.get("lead_in", LEAD_IN))
+    gap = float(settings.get("gap", GAP))
+    tail = float(settings.get("tail", TAIL))
+    if fps <= 0 or any(not math.isfinite(x) or x < 0 for x in (lead_in, gap, tail)):
+        raise ValueError("meta.timing requires positive fps and nonnegative finite lead_in, gap, tail")
     narr_path = HERE / "build" / "narration.json"
     narration = json.loads(narr_path.read_text()) if narr_path.exists() else {}
-    wpm = sb["meta"].get("words_per_minute", 140)
+    wpm = sb["meta"].get("words_per_minute", 163)
     scenes, start = [], 0.0
     for scene in sb["scenes"]:
-        t, beats = LEAD_IN, []
+        t, beats = lead_in, []
         for beat in scene["beats"]:
             text = " ".join(beat.get("narration", "").split())
-            if beat["id"] in narration:
+            if beat["id"] in narration and narration[beat["id"]].get("text") == text:
                 dur, wav, measured = narration[beat["id"]]["duration"], narration[beat["id"]]["wav"], True
             else:
                 dur, wav, measured = (len(text.split()) / wpm * 60 if text else 0.0), None, False
-            slot = dur + (GAP if text else 0) + float(beat.get("hold_seconds") or 0)
+            slot = dur + (gap if text else 0) + float(beat.get("hold_seconds") or 0)
             beats.append({"id": beat["id"], "start": round(t, 3), "dur": round(dur, 3), "slot": round(slot, 3),
                           "end": round(t + slot, 3), "text": text, "onscreen_text": beat.get("onscreen_text", []),
                           "wav": wav, "measured": measured})
             t += slot
-        duration = math.ceil((t + TAIL) * FPS) / FPS
+        duration = math.ceil((t + tail) * fps) / fps
         scenes.append({"id": scene["id"], "title": scene.get("title", ""), "start": round(start, 3),
-                       "duration": duration, "frames": round(duration * FPS), "beats": beats})
+                       "duration": duration, "frames": round(duration * fps), "beats": beats})
         start += duration
-    timing = {"fps": FPS, "total": round(start, 3), "scenes": scenes}
+    timing = {"fps": fps, "total": round(start, 3), "scenes": scenes}
     (HERE / "build").mkdir(exist_ok=True)
     (HERE / "build" / "timing.json").write_text(json.dumps(timing, indent=1))
     (HERE / "web" / "timing.js").write_text(

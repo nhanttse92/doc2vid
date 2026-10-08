@@ -1,14 +1,16 @@
 """Assemble the final film: scene videos + narration placed on the timeline + ducked music + subtitles.
 
-    python3 assemble.py            # needs build/video/<scene>.mp4 for every scene, build/narration.json
-    python3 assemble.py --no-music
+    python3 assemble.py --name video  # needs build/video/<scene>.mp4 for every scene
+    python3 assemble.py --name video --clean
 
-Writes out/warehouse_training.mp4 (soft subtitles included) and out/warehouse_training.srt.
+Writes out/<name>.mp4 (soft subtitles included) and out/<name>.srt.
 """
 
 import argparse
 import array
 import json
+import re
+import shutil
 import subprocess
 import textwrap
 import wave
@@ -17,7 +19,6 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 BUILD, OUT = HERE / "build", HERE / "out"
 RATE = 44100
-NAME = "warehouse_training"
 
 
 def ff(*args):
@@ -62,15 +63,16 @@ def narration_track(timing):
     return out
 
 
-def music_track(timing, cues):
+def music_track(timing, cues, storyboard):
     """Each run of consecutive scenes sharing a cue gets that cue's bed from its start; runs
     overlap by FADE seconds at their boundaries and crossfade."""
-    from music import runs
+    from music import runs, cue_scenes
     FADE = 3.0
     order = [s["id"] for s in timing["scenes"]]
     starts = {s["id"]: s["start"] for s in timing["scenes"]}
     ends = {s["id"]: s["start"] + s["duration"] for s in timing["scenes"]}
-    segments = sorted((starts[run[0]], ends[run[-1]], cue["id"]) for cue in cues for run in runs(cue["scenes"], order))
+    segments = sorted((starts[run[0]], ends[run[-1]], cue["id"]) for cue in cues
+                      for run in runs(cue_scenes(cue, storyboard), order))
     inputs, chains = [], []
     for i, (a, b, cue_id) in enumerate(segments):
         first, last = i == 0, i == len(segments) - 1
@@ -85,7 +87,7 @@ def music_track(timing, cues):
     return out
 
 
-def srt(timing):
+def srt(timing, name):
     def stamp(t):
         ms = int(round(t * 1000))
         return f"{ms // 3600000:02d}:{ms // 60000 % 60:02d}:{ms // 1000 % 60:02d},{ms % 1000:03d}"
@@ -102,7 +104,7 @@ def srt(timing):
                 n += 1
                 rows.append(f"{n}\n{stamp(t)} --> {stamp(t + d)}\n" + "\n".join(textwrap.wrap(chunk, 44)) + "\n")
                 t += d
-    out = OUT / f"{NAME}.srt"
+    out = OUT / f"{name}.srt"
     out.write_text("\n".join(rows))
     return out
 
@@ -110,19 +112,27 @@ def srt(timing):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-music", action="store_true")
+    ap.add_argument("--name", default="video")
+    ap.add_argument("--clean", action="store_true")
     args = ap.parse_args()
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", args.name):
+        ap.error("--name must contain only letters, digits, underscore or hyphen")
     OUT.mkdir(exist_ok=True)
     timing = json.loads((BUILD / "timing.json").read_text())
-    cues = json.loads((HERE / "storyboard.json").read_text()).get("music", [])
+    storyboard = json.loads((HERE / "storyboard.json").read_text())
+    cues = storyboard.get("music", [])
     video = concat_video(timing)
     voice = narration_track(timing)
-    subs = srt(timing)
-    final = OUT / f"{NAME}.mp4"
-    if args.no_music or not cues:
+    subs = srt(timing, args.name)
+    final = OUT / f"{args.name}.mp4"
+    missing = [cue["id"] for cue in cues if not (BUILD / "music" / f"{cue['id']}.wav").is_file()]
+    if missing and not args.no_music:
+        print(f"warning: missing music bed(s) {', '.join(missing)}; assembling without music")
+    if args.no_music or not cues or missing:
         mix = f"[1:a]aformat=channel_layouts=stereo,loudnorm=I=-16:TP=-1.5:LRA=11[a]"
         inputs = ["-i", video, "-i", voice]
     else:
-        music = music_track(timing, cues)
+        music = music_track(timing, cues, storyboard)
         # Music sits well under the voice and ducks further whenever the narrator speaks.
         mix = ("[1:a]aformat=sample_rates=44100:channel_layouts=stereo,asplit=2[v][key];"
                "[2:a]volume=-17dB[bed];"
@@ -133,6 +143,17 @@ def main():
        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", RATE, "-c:s", "mov_text",
        "-metadata:s:s:0", "language=eng", "-movflags", "+faststart", final)
     print(f"{final.relative_to(HERE)}  {duration(final) / 60:.2f} min; subtitles {subs.relative_to(HERE)}")
+    if args.clean:
+        for track in BUILD.glob("*_track.wav"):
+            track.unlink()
+        (BUILD / "film_video.mp4").unlink(missing_ok=True)
+        for folder in (BUILD / "shots", BUILD / "draft"):
+            if folder.exists():
+                shutil.rmtree(folder)
+        for take in (BUILD / "music").glob("*.wav"):
+            if take.name not in {f"{cue['id']}.wav" for cue in cues}:
+                take.unlink()
+        print("cleaned large intermediates")
 
 
 if __name__ == "__main__":

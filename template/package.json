@@ -2,6 +2,7 @@
   "name": "warehouse-training-video",
   "private": true,
   "type": "module",
+  "scripts": { "test": "node --test tests/" },
   "devDependencies": {
     "marked": "^18.1.0",
     "playwright": "1.63.0"

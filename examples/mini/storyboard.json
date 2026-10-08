@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "title": "Lifting Safely",
+    "voice": "Charon",
+    "persona": "A calm, practical workplace trainer who speaks clearly and without urgency.",
+    "audience": "new warehouse employees",
+    "target_seconds": 60,
+    "words_per_minute": 163,
+    "timing": { "fps": 6 }
+  },
+  "music": [
+    { "id": "m01", "prompt": "Quiet, warm instrumental with soft piano and no vocals.", "scenes": ["s01", "s02"] }
+  ],
+  "scenes": [
+    {
+      "id": "s01", "title": "Before the Lift", "mood": "Calm and observant.", "music": "m01",
+      "beats": [
+        { "id": "s01b01", "narration": "Before lifting a box, pause and look at where it needs to go. A clear route makes the next steps easier to plan.", "delivery": "Friendly and measured.", "visual": "A worker checks the path beside a box.", "onscreen_text": ["Pause before lifting", "Check the route"], "hold_seconds": 0 },
+        { "id": "s01b02", "narration": "Check the box and its label before you move it. If the load seems awkward or too heavy, stop and ask for help.", "delivery": "Clear and practical.", "visual": "The worker points at a label, then asks a colleague.", "onscreen_text": ["Check the load", "Ask for help when needed"], "hold_seconds": 0 },
+        { "id": "s01b03", "narration": "Move close to the box so you can keep it near your body. Make sure your feet are steady before beginning the lift.", "delivery": "Steady.", "visual": "The worker steps close and sets their feet.", "onscreen_text": ["Keep the load close", "Set your feet"], "hold_seconds": 0 }
+      ]
+    },
+    {
+      "id": "s02", "title": "Lift and Move", "mood": "Confident and reassuring.", "music": "m01",
+      "beats": [
+        { "id": "s02b01", "narration": "Bend your knees and keep your back in a comfortable, stable position. Lift smoothly, keeping the box close as you stand up.", "delivery": "Patient.", "visual": "The worker bends at the knees and lifts the box.", "onscreen_text": ["Bend your knees", "Lift smoothly"], "hold_seconds": 0 },
+        { "id": "s02b02", "narration": "While carrying the box, look ahead and take steady steps. If you need to turn, move your feet instead of twisting your body.", "delivery": "Clear and calm.", "visual": "The worker takes short steps and turns their feet.", "onscreen_text": ["Look ahead", "Turn with your feet"], "hold_seconds": 0 },
+        { "id": "s02b03", "narration": "At the destination, lower the box with control. Check that it rests securely, then take a moment to make sure the route stays clear.", "delivery": "Warm close.", "visual": "The box is set down securely and the path remains clear.", "onscreen_text": ["Lower with control", "Keep the route clear"], "hold_seconds": 0 }
+      ]
+    }
+  ]
+}

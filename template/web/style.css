@@ -1,0 +1,7 @@
+@font-face { font-family: 'Inter'; src: url('fonts/Inter.woff2') format('woff2'); font-weight: 100 900; font-style: normal; }
+:root { --bg-dark: #14233A; --bg-light: #F4F1EA; }
+html, body { margin: 0; background: var(--bg-dark); overflow: hidden; }
+#stage { display: block; font-family: Inter, system-ui, sans-serif; }
+/* Scenes open and close through bg-dark, the colour of the title cards most scenes start on. */
+.veil { fill: var(--bg-dark); }
+.grid rect { fill: none; stroke: #ff00ff; stroke-width: 2; stroke-dasharray: 12 8; }

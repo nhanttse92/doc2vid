@@ -9,8 +9,12 @@ trims it, and ducks it under the voice.
 """
 
 import json
+import hashlib
 import math
+import os
+import shutil
 import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -33,6 +37,20 @@ def runs(cue_scenes, order):
     return out
 
 
+def cue_scenes(cue, storyboard):
+    return cue.get("scenes") or [s["id"] for s in storyboard["scenes"] if s.get("music") == cue["id"]]
+
+
+def take_path(prompt, seconds, seed, offline):
+    key = hashlib.sha256(json.dumps([prompt, seconds, seed], ensure_ascii=False).encode()).hexdigest()[:20]
+    return MUSIC / f"take_{key}{'_offline' if offline else ''}.wav"
+
+
+def silence(path, seconds):
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i",
+                    "anullsrc=r=44100:cl=stereo", "-t", str(seconds), "-c:a", "pcm_s16le", str(path)], check=True)
+
+
 def length(path):
     return float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
                                  str(path)], capture_output=True, text=True, check=True).stdout)
@@ -43,24 +61,39 @@ def main():
     timing = json.loads((HERE / "build" / "timing.json").read_text())
     span = {s["id"]: s["duration"] for s in timing["scenes"]}
     order = [s["id"] for s in timing["scenes"]]
+    MUSIC.mkdir(parents=True, exist_ok=True)
+    offline = os.environ.get("DOC2VID_OFFLINE") == "1"
+    if not offline and sb.get("music"):
+        try:
+            voice._key()
+        except RuntimeError as exc:
+            sys.exit(str(exc))
     jobs, need = [], {}
     for cue in sb.get("music", []):
-        need[cue["id"]] = max(sum(span[s] for s in run) for run in runs(cue["scenes"], order)) + 10
+        cue_runs = runs(cue_scenes(cue, sb), order)
+        if not cue_runs:
+            continue
+        need[cue["id"]] = max(sum(span[s] for s in run) for run in cue_runs) + 10
         jobs += [(cue, seed) for seed in range(math.ceil(need[cue["id"]] / TAKE_SECONDS))]
 
     def take(job):
         cue, seed = job
-        out = MUSIC / f"{cue['id']}_take{seed}.wav"
+        out = take_path(cue["prompt"], TAKE_SECONDS, 100 + seed, offline)
         if not out.exists():
-            voice.compose(cue["prompt"], out, seed=100 + seed)
+            if offline:
+                silence(out, TAKE_SECONDS + XFADE)
+            else:
+                voice.compose(cue["prompt"], out, seed=100 + seed)
         return cue["id"], out
 
     with ThreadPoolExecutor(6) as pool:
         made = list(pool.map(take, jobs))
     for cue in sb.get("music", []):
         parts = [p for c, p in made if c == cue["id"]]
+        if not parts:
+            continue
         if len(parts) == 1:
-            subprocess.run(["cp", parts[0], MUSIC / f"{cue['id']}.wav"], check=True)
+            shutil.copyfile(parts[0], MUSIC / f"{cue['id']}.wav")
         else:
             inputs = [a for p in parts for a in ("-i", str(p))]
             chain, last = [], "[0:a]"
