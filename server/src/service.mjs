@@ -3,6 +3,7 @@ import { cp, mkdir, readFile, readdir, realpath, rename, rm, stat, symlink, writ
 import path from 'node:path';
 import { runCommand } from './commands.mjs';
 import { runAgent, fakeAgent } from './agent.mjs';
+import { runChannelAgent } from './channel-runner.mjs';
 import { readDotenv } from './config.mjs';
 
 const stages = ['extract', 'storyboard', 'narrate', 'timing', 'scenes', 'music', 'assemble', 'revise'];
@@ -27,7 +28,7 @@ export function validateUpload(name, data) {
 function summary(job) {
   return {
     id: job.id, title: job.title, status: job.status, stage: job.stage,
-    minutes: job.minutes, created: job.created, updated: job.updated,
+    minutes: job.minutes, agent: job.agent || 'sdk', created: job.created, updated: job.updated,
     queuePosition: job.queuePosition ?? null, inputName: job.input.name,
     hasVideo: job.hasVideo || false, durationSeconds: job.durationSeconds ?? null,
   };
@@ -47,10 +48,11 @@ async function fileInfo(job, name) {
 }
 
 export class JobService {
-  constructor(config, { commandRunner = runCommand, agentRunner } = {}) {
+  constructor(config, { commandRunner = runCommand, agentRunner, channelRunner } = {}) {
     this.config = config;
     this.commandRunner = commandRunner;
     this.agentRunner = agentRunner || (config.fakeAgent ? fakeAgent : runAgent);
+    this.channelRunner = channelRunner || (config.fakeAgent ? fakeAgent : runChannelAgent);
     this.jobs = new Map();
     this.waiting = [];
     this.running = null;
@@ -192,11 +194,13 @@ export class JobService {
     return text;
   }
 
-  async create({ fileName, data, prompt = '', minutes = 5, title }) {
+  async create({ fileName, data, prompt = '', minutes = 5, title, agent }) {
     const name = safeName(fileName);
     const ext = validateUpload(name, data);
     if (data.length > this.config.maxUploadBytes) throw Object.assign(new Error('File exceeds the upload limit.'), { code: 'too_large' });
     if (![2, 5, 10, 20].includes(Number(minutes)) || !/^\d+$/.test(String(minutes))) throw Object.assign(new Error('Minutes must be 2, 5, 10 or 20.'), { code: 'bad_minutes' });
+    agent = agent || this.config.agentTransport || 'sdk';
+    if (!['sdk', 'channel'].includes(agent)) throw Object.assign(new Error('Agent must be sdk or channel.'), { code: 'bad_agent' });
     if (typeof prompt !== 'string' || prompt.length > 4000 || typeof title !== 'undefined' && (typeof title !== 'string' || title.length > 120)) throw Object.assign(new Error('Prompt or title is too long.'), { code: 'bad_request' });
     let id, dir;
     do {
@@ -209,7 +213,7 @@ export class JobService {
       await symlink(path.join(this.config.template, 'node_modules'), path.join(dir, 'node_modules'), 'dir');
       await mkdir(path.join(dir, 'source'), { recursive: true });
       await writeFile(path.join(dir, `source/original${ext}`), data);
-      const job = { id, title: title || name.slice(0, -ext.length), prompt, minutes: Number(minutes), created: iso(), createdOrder: Date.now() * 1000 + this.jobs.size % 1000, updated: iso(), input: { name, ext }, status: 'queued', stage: 'extract', queuePosition: null, hasVideo: false, durationSeconds: null, lastSeq: 0, stages: stages.map(name => ({ name, state: 'pending', started: null, finished: null })), scenes: [], runKind: 'initial', dir, writeChain: Promise.resolve(), eventChain: Promise.resolve() };
+      const job = { id, title: title || name.slice(0, -ext.length), prompt, minutes: Number(minutes), agent, created: iso(), createdOrder: Date.now() * 1000 + this.jobs.size % 1000, updated: iso(), input: { name, ext }, status: 'queued', stage: 'extract', queuePosition: null, hasVideo: false, durationSeconds: null, lastSeq: 0, stages: stages.map(name => ({ name, state: 'pending', started: null, finished: null })), scenes: [], runKind: 'initial', dir, writeChain: Promise.resolve(), eventChain: Promise.resolve() };
       await this.emit(job, { type: 'user', text: prompt, file: name });
       await this.persist(job);
       this.jobs.set(id, job);
@@ -359,7 +363,8 @@ export class JobService {
     };
     let result;
     try {
-      result = await this.agentRunner({ role, scene, cwd: job.dir, prompt, model: role === 'scene' ? this.config.sceneModel : this.config.storyboardModel, resume, timeoutMs: role === 'scene' ? 2_400_000 : 1_800_000, signal, config: this.config, onEvent });
+      const runner = job.agent === 'channel' ? this.channelRunner : this.agentRunner;
+      result = await runner({ role, scene, cwd: job.dir, prompt, model: role === 'scene' ? this.config.sceneModel : this.config.storyboardModel, resume, timeoutMs: role === 'scene' ? 2_400_000 : 1_800_000, signal, config: this.config, onEvent });
     } finally {
       for (const msg of pendingSay.keys()) flushSay(msg);
     }
@@ -535,7 +540,7 @@ export class JobService {
           await this.emit(job, { type: 'progress', stage: 'scenes', done, total: board.scenes.length });
         }
       };
-      const results = await Promise.allSettled(Array.from({ length: Math.min(this.config.sceneConcurrency, board.scenes.length) }, worker));
+      const results = await Promise.allSettled(Array.from({ length: Math.min(job.agent === 'channel' ? 1 : this.config.sceneConcurrency, board.scenes.length) }, worker));
       const failure = results.find(result => result.status === 'rejected');
       if (failure) throw failure.reason;
       throwIfAborted(signal);

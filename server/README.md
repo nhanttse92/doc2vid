@@ -21,3 +21,18 @@ The service uses the local Claude CLI login by default. To use API-key billing i
 Configuration defaults: `HOST=127.0.0.1`, `PORT=8790`, `DOC2VID_HOME=~/doc2vid-data`, `TEMPLATE_DIR=<repo>/template`, `OPENROUTER_ENV_FILE=~/.config/doc2vid/env`, `CLAUDE_PATH=~/.local/bin/claude`, `STORYBOARD_MODEL=claude-opus-5-5`, `SCENE_MODEL=claude-opus-5-5`, `SCENE_CONCURRENCY=3`, `RENDER_JOBS=4`, `MAX_UPLOAD_MB=50`, `AGENT_SANDBOX=0`. `ORIGIN_KEY` is required. `DOC2VID_FAKE_AGENT=1` uses the deterministic test agent; `DOC2VID_OFFLINE=1` is forwarded to the template scripts.
 
 LaunchAgent logs are at `~/Library/Logs/doc2vid/stdout.log` and `stderr.log`. The awake agent runs `caffeinate -dimsu`.
+
+## Channel agent (owner-only debugging path)
+
+Jobs created with `agent=channel` send their storyboard, scene and revise tasks to `src/channel.mjs`, a
+[Claude Code channel](https://code.claude.com/docs/en/channels-reference) that a single long-lived
+interactive Claude Code session spawns. The session runs in tmux under the LaunchAgent
+`com.albinilabs.doc2vid-agent` (`deploy/agent-session.sh`), with `agent/CLAUDE.md` as its instructions
+and the owner's subscription login. Tasks are delivered one at a time; the session answers with the
+channel's `say` and `finish` tools. `AGENT_TRANSPORT=channel` in `server.env` makes it the default.
+
+- Watch it: `tmux -L doc2vid attach -t agent` (detach with Ctrl-b d).
+- Channel status: `curl 127.0.0.1:8792/health`.
+- Start a fresh session (needed after changing `src/channel.mjs`): `DOC2VID_RESTART_AGENT=1 sh deploy/push.sh`.
+
+It stays owner-only: the subscription must not serve other people's requests.

@@ -8,4 +8,4 @@ rsync -a --delete \
   --exclude='.env' --exclude='*.env' --exclude='server.env' \
   "$ROOT/" "$HOST:doc2vid/"
 # A non-interactive ssh shell lacks Homebrew's PATH, so tools like node and python3 3.14 would not be found.
-ssh "$HOST" 'export PATH=/opt/homebrew/bin:$HOME/.local/bin:$PATH; cd ~/doc2vid && sh deploy/install.sh'
+ssh "$HOST" "export PATH=/opt/homebrew/bin:\$HOME/.local/bin:\$PATH DOC2VID_RESTART_AGENT=${DOC2VID_RESTART_AGENT:-0}; cd ~/doc2vid && sh deploy/install.sh"

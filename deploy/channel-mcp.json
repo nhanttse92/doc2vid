@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "doc2vid": { "command": "@NODE@", "args": ["@ROOT@/server/src/channel.mjs"] }
+  }
+}

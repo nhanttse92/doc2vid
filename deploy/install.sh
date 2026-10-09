@@ -23,18 +23,24 @@ from xml.sax.saxutils import escape
 root = Path(os.environ['DOC2VID_INSTALL_ROOT'])
 node = os.environ['DOC2VID_INSTALL_NODE']
 home = str(Path.home())
-names = ['com.albinilabs.doc2vid.plist', 'com.albinilabs.doc2vid-awake.plist']
+names = ['com.albinilabs.doc2vid.plist', 'com.albinilabs.doc2vid-awake.plist', 'com.albinilabs.doc2vid-agent.plist']
 # The tunnel only runs once its token has been placed (it is created in the Cloudflare account, not here).
 if (Path.home() / '.config' / 'doc2vid' / 'tunnel-token').exists():
     names.append('com.albinilabs.doc2vid-tunnel.plist')
 for name in names:
     source = (root / 'deploy' / name).read_text()
-    for key, value in {'@NODE@': node, '@SERVER@': str(root / 'server'), '@HOME@': home}.items():
+    for key, value in {'@NODE@': node, '@SERVER@': str(root / 'server'), '@ROOT@': str(root), '@HOME@': home}.items():
         source = source.replace(key, escape(value))
     (Path.home() / 'Library' / 'LaunchAgents' / name).write_text(source)
+# MCP config the agent session loads to spawn the doc2vid channel server.
+mcp = (root / 'deploy' / 'channel-mcp.json').read_text().replace('@NODE@', node).replace('@ROOT@', str(root))
+(Path.home() / '.config' / 'doc2vid' / 'channel-mcp.json').write_text(mcp)
 PY
 DOMAIN="gui/$(id -u)"
-labels='com.albinilabs.doc2vid com.albinilabs.doc2vid-awake'
+labels='com.albinilabs.doc2vid com.albinilabs.doc2vid-awake com.albinilabs.doc2vid-agent'
+# Reinstalling keeps the running agent session (and its conversation); pass DOC2VID_RESTART_AGENT=1 to
+# start a fresh one, e.g. after changing server/src/channel.mjs, which the session spawns.
+if [ "${DOC2VID_RESTART_AGENT:-0}" = 1 ]; then /opt/homebrew/bin/tmux -L doc2vid kill-session -t agent 2>/dev/null || true; fi
 if [ -f "$HOME/.config/doc2vid/tunnel-token" ]; then labels="$labels com.albinilabs.doc2vid-tunnel"; fi
 for label in $labels; do
   plist="$HOME/Library/LaunchAgents/$label.plist"

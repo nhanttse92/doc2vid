@@ -156,7 +156,7 @@ export async function createServer(config, options = {}) {
         const file = form.get('file');
         if (!file || typeof file.arrayBuffer !== 'function' || !file.name) return failure(res, 'bad_file', 'A document file is required.');
         const data = Buffer.from(await file.arrayBuffer());
-        const job = await service.create({ fileName: file.name, data, prompt: form.get('prompt') ?? '', minutes: form.get('minutes') ?? 5, title: form.get('title') ?? undefined });
+        const job = await service.create({ fileName: file.name, data, prompt: form.get('prompt') ?? '', minutes: form.get('minutes') ?? 5, title: form.get('title') ?? undefined, agent: form.get('agent') || undefined });
         return json(res, 201, { job });
       }
       if (req.method === 'GET' && url.pathname === '/jobs') return json(res, 200, { jobs: service.list() });
@@ -184,7 +184,7 @@ export async function createServer(config, options = {}) {
       return failure(res, 'not_found', 'Not found.', 404);
     })().catch(error => {
       if (res.headersSent) return res.destroy();
-      const status = error.code === 'too_large' ? 413 : ['bad_file', 'bad_minutes', 'bad_request'].includes(error.code) ? 400 : 500;
+      const status = error.code === 'too_large' ? 413 : ['bad_file', 'bad_minutes', 'bad_agent', 'bad_request'].includes(error.code) ? 400 : 500;
       failure(res, error.code || 'internal_error', status === 500 ? 'Internal server error.' : error.message, status);
       if (status === 500) process.stderr.write(`HTTP error: ${service.redact(error.message)}\n`);
     });

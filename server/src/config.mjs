@@ -45,5 +45,7 @@ export async function loadConfig(overrides = {}) {
     sceneConcurrency: concurrency, renderJobs,
     maxUploadBytes: Math.floor(number('MAX_UPLOAD_MB', 50) * 1024 * 1024),
     agentSandbox: env.AGENT_SANDBOX === '1', fakeAgent: env.DOC2VID_FAKE_AGENT === '1',
+    agentTransport: env.AGENT_TRANSPORT === 'channel' ? 'channel' : 'sdk',
+    channelUrl: env.CHANNEL_URL || 'http://127.0.0.1:8792',
   };
 }

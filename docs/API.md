@@ -26,6 +26,7 @@ Errors are JSON: `{"error": "<code>", "message": "<human sentence>"}`.
 - `prompt`: optional instructions, at most 4000 characters (audience, tone, what to emphasise).
 - `minutes`: `2`, `5`, `10` or `20`; default `5`. Error: `bad_minutes`.
 - `title`: optional, at most 120 characters; defaults to the file name without extension.
+- `agent`: `sdk` (default; Claude Agent SDK sessions, scenes in parallel) or `channel` (owner-only debugging path: one long-lived interactive Claude Code session fed through the doc2vid channel, scenes one at a time). Error: `bad_agent`.
 
 File names for `/files/:name`: `video.mp4`, `video.srt`, `video.vtt`, `storyboard.json`, `original`
 (the upload, served with its original file name in `content-disposition`). Anything else is 404.
@@ -38,6 +39,7 @@ File names for `/files/:name`: `video.mp4`, `video.srt`, `video.vtt`, `storyboar
   "status": "queued | running | done | failed | cancelled",
   "stage": "extract | storyboard | narrate | timing | music | scenes | assemble | revise | null",
   "minutes": 5,
+  "agent": "sdk | channel",
   "created": "2026-10-08T22:10:00Z",
   "updated": "2026-10-08T22:31:12Z",
   "queuePosition": null,

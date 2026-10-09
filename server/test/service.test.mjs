@@ -73,7 +73,15 @@ async function setup(t, options = {}) {
     return result;
   };
   const config = { env: { PATH: process.env.PATH, DOC2VID_OFFLINE: '1', ORIGIN_KEY: 'test-key', OPENROUTER_API_KEY: 'must-not-leak' }, host: '127.0.0.1', port: 0, home: path.join(root, 'data'), template, originKey: 'test-key', openrouterFile: path.join(root, 'absent'), claudePath: '/bin/false', storyboardModel: 'fake', sceneModel: 'fake', sceneConcurrency: 2, renderJobs: 1, maxUploadBytes: options.maxBytes || 1024, agentSandbox: false, fakeAgent: true };
-  const app = await createServer(config, { commandRunner, agentRunner });
+  const channelCalls = [];
+  let channelActive = 0, channelPeak = 0;
+  // Stands in for the channel transport: records calls and how many ran at once.
+  const channelRunner = async args => {
+    channelCalls.push({ role: args.role, scene: args.scene });
+    channelPeak = Math.max(channelPeak, ++channelActive);
+    try { await sleep(20); return await agentRunner(args); } finally { channelActive--; }
+  };
+  const app = await createServer(config, { commandRunner, agentRunner, channelRunner });
   await app.listen();
   const base = `http://127.0.0.1:${app.server.address().port}`;
   t.after(async () => { blockResolve(); await app.close(); await rm(root, { recursive: true, force: true }); });
@@ -93,7 +101,7 @@ async function setup(t, options = {}) {
     }
     throw new Error(`Timed out waiting for ${target}`);
   };
-  return { root, template, calls, agentCalls, app, config, base, request, upload, waitStatus, unblock: blockResolve };
+  return { root, template, calls, agentCalls, channelCalls, channelPeak: () => channelPeak, app, config, base, request, upload, waitStatus, unblock: blockResolve };
 }
 
 async function createId(env, ...args) {
@@ -324,4 +332,20 @@ test('optional real-template offline integration', { skip: process.env.DOC2VID_I
   while (Date.now() < deadline && !['done', 'failed'].includes(app.service.get(id).status)) await sleep(250);
   assert.equal(app.service.get(id).status, 'done', JSON.stringify(await app.service.detail(app.service.get(id))));
   assert.ok((await app.service.output(app.service.get(id), 'video.mp4')).size > 0);
+});
+
+test('a channel job sends its agent work through the channel runner, one scene at a time', async t => {
+  const e = await setup(t);
+  const bad = await e.upload('guide.txt', 'Training guide', { agent: 'telepathy' });
+  assert.equal(bad.status, 400);
+  assert.equal((await bad.json()).error, 'bad_agent');
+  const sdkCalls = e.agentCalls.length;
+  const id = await createId(e, 'guide.txt', 'Training guide', { agent: 'channel' });
+  const job = await e.waitStatus(id, 'done');
+  assert.equal(job.agent, 'channel');
+  assert.ok(e.channelCalls.some(call => call.role === 'storyboard'));
+  assert.ok(e.channelCalls.filter(call => call.role === 'scene').length >= 2);
+  assert.equal(e.channelPeak(), 1);
+  // Every agent call went through the channel runner (which delegates to the fake for its output).
+  assert.equal(e.agentCalls.length - sdkCalls, e.channelCalls.length);
 });
