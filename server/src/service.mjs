@@ -35,9 +35,10 @@ export function validateUpload(name, data) {
 }
 
 function summary(job) {
+  // Jobs saved before the agent field existed all ran the Agent SDK pipeline.
   return {
     id: job.id, title: job.title, status: job.status, stage: job.stage,
-    minutes: job.minutes, agent: job.agent || 'session', created: job.created, updated: job.updated,
+    minutes: job.minutes, agent: job.agent || 'sdk', created: job.created, updated: job.updated,
     queuePosition: job.queuePosition ?? null, inputName: job.input.name,
     hasVideo: job.hasVideo || false, durationSeconds: job.durationSeconds ?? null,
   };

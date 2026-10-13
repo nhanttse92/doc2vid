@@ -475,3 +475,18 @@ test('warnings keep the last meaningful line of a traceback', async () => {
   assert.equal(brief('python3 music.py exited 1\nMusic failed for m01: Lyria returned no audio'), 'Music failed for m01: Lyria returned no audio');
   assert.ok(brief('x'.repeat(500)).length <= 240);
 });
+
+test('a job saved before the agent field existed loads as an SDK job', async t => {
+  const e = await setup(t, { answerOnly: true });
+  const id = await createId(e, 'guide.txt', 'Training guide', { agent: 'sdk' });
+  await e.waitStatus(id, 'done');
+  await e.app.close();
+  const jobFile = path.join(e.config.home, 'jobs', id, 'job.json');
+  const legacy = JSON.parse(await readFile(jobFile, 'utf8'));
+  delete legacy.agent;
+  await writeFile(jobFile, JSON.stringify(legacy));
+  const resumed = await createServer(e.config, { commandRunner: e.app.service.commandRunner, agentRunner: fakeAgent });
+  await resumed.listen();
+  t.after(() => resumed.close());
+  assert.equal(resumed.service.list().find(job => job.id === id).agent, 'sdk');
+});
