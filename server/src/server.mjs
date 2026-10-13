@@ -18,7 +18,7 @@ const goodKey = (provided, expected) => {
 };
 const parseSeq = value => /^\d+$/.test(String(value ?? '')) ? Number(value) : 0;
 const mime = { 'video.mp4': 'video/mp4', 'video.srt': 'application/x-subrip; charset=utf-8', 'video.vtt': 'text/vtt; charset=utf-8', 'storyboard.json': 'application/json; charset=utf-8' };
-const inputMime = { '.pdf': 'application/pdf', '.doc': 'application/msword', '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.rtf': 'application/rtf', '.odt': 'application/vnd.oasis.opendocument.text', '.txt': 'text/plain; charset=utf-8', '.md': 'text/markdown; charset=utf-8' };
+const inputMime = { '.pdf': 'application/pdf', '.doc': 'application/msword', '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.rtf': 'application/rtf', '.odt': 'application/vnd.oasis.opendocument.text', '.txt': 'text/plain; charset=utf-8', '.md': 'text/markdown; charset=utf-8', '.png': 'image/png' };
 const dispositionName = name => encodeURIComponent(name).replace(/['()*]/g, char => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
 
 async function readJson(req) {
@@ -165,6 +165,13 @@ export async function createServer(config, options = {}) {
       if (!job) return failure(res, 'not_found', 'Job not found.', 404);
       if (req.method === 'GET' && parts.length === 2) return json(res, 200, { job: await service.detail(job) });
       if (req.method === 'GET' && parts.length === 3 && parts[2] === 'events') return events(service, job, req, res, url);
+      if (req.method === 'POST' && parts.length === 3 && parts[2] === 'steps') {
+        // The public Worker forwards every /api/doc2vid path, so only the channel knows this task token.
+        if (!service.goodStepToken(job.id, req.headers['x-doc2vid-step'])) return failure(res, 'unauthorized', 'An active task token is required.', 401);
+        const body = await readJson(req);
+        if (!body || typeof body !== 'object' || typeof body.name !== 'string' || body.scene != null && typeof body.scene !== 'string') return failure(res, 'bad_request', 'Expected a step name and optional scene.');
+        return json(res, 200, await service.step(job.id, req.headers['x-doc2vid-step'], body));
+      }
       if (req.method === 'POST' && parts.length === 3 && parts[2] === 'messages') {
         if (['queued', 'running'].includes(job.status)) return failure(res, 'busy', 'The job is busy.', 409);
         const body = await readJson(req);
@@ -184,7 +191,7 @@ export async function createServer(config, options = {}) {
       return failure(res, 'not_found', 'Not found.', 404);
     })().catch(error => {
       if (res.headersSent) return res.destroy();
-      const status = error.code === 'too_large' ? 413 : ['bad_file', 'bad_minutes', 'bad_agent', 'bad_request'].includes(error.code) ? 400 : 500;
+      const status = error.code === 'too_large' ? 413 : error.code === 'unauthorized' ? 401 : ['bad_file', 'bad_minutes', 'bad_agent', 'bad_request'].includes(error.code) ? 400 : 500;
       failure(res, error.code || 'internal_error', status === 500 ? 'Internal server error.' : error.message, status);
       if (status === 500) process.stderr.write(`HTTP error: ${service.redact(error.message)}\n`);
     });

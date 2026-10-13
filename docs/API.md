@@ -13,20 +13,27 @@ Errors are JSON: `{"error": "<code>", "message": "<human sentence>"}`.
 | Method | Path | Body | Success |
 |---|---|---|---|
 | GET | `/health` | | `{ok, version, queue: {running: jobId or null, waiting: n}}` |
-| POST | `/jobs` | multipart: `file` (required), `prompt`, `minutes`, `title` | 201 `{job: JobSummary}` |
+| POST | `/jobs` | multipart: `file` (required), `prompt`, `minutes`, `title`, `agent` | 201 `{job: JobSummary}` |
 | GET | `/jobs` | | `{jobs: JobSummary[]}`, newest first, at most 50 |
 | GET | `/jobs/:id` | | `{job: JobDetail}` |
 | GET | `/jobs/:id/events` | | Server-Sent Events, see below |
 | POST | `/jobs/:id/messages` | JSON `{text}` | 202 `{ok: true}`; 409 `{error: "busy"}` while queued or running |
 | POST | `/jobs/:id/cancel` | | `{ok: true}` |
+| POST | `/jobs/:id/steps` | JSON `{name, scene?}`; `x-doc2vid-step` header | 200 `{ok, text}` (internal channel use only) |
 | GET | `/jobs/:id/files/:name` | | the file; supports `Range` |
 
 `POST /jobs` fields:
-- `file`: `.pdf`, `.doc`, `.docx`, `.rtf`, `.odt`, `.txt` or `.md`, at most 50 MB. Errors: `bad_file`, `too_large`.
+- `file`: `.pdf`, `.doc`, `.docx`, `.rtf`, `.odt`, `.txt`, `.md` or `.png`, at most 50 MB. Errors: `bad_file`, `too_large`.
 - `prompt`: optional instructions, at most 4000 characters (audience, tone, what to emphasise).
 - `minutes`: `2`, `5`, `10` or `20`; default `5`. Error: `bad_minutes`.
 - `title`: optional, at most 120 characters; defaults to the file name without extension.
-- `agent`: `sdk` (default; Claude Agent SDK sessions, scenes in parallel) or `channel` (owner-only debugging path: one long-lived interactive Claude Code session fed through the doc2vid channel, scenes one at a time). Error: `bad_agent`.
+- `agent`: `session` (default; one task to the always-on Claude Code session, which makes the whole video and calls server steps), `sdk` (Claude Agent SDK sessions, scenes in parallel), or `channel` (fixed pipeline with agent tasks sent to the interactive session, scenes one at a time). Error: `bad_agent`.
+
+`POST /jobs/:id/steps` is internal to the channel. The origin key is still required. The per-task
+`x-doc2vid-step` token is held only in memory by the job service and channel, and a missing, wrong or
+expired token returns 401; an unknown job returns 404. Valid names are `narrate`, `music`, `render`
+(requires `scene`), and `assemble`. A malformed JSON body returns 400. The public Worker forwards
+every `/api/doc2vid` path, so browser requests do not have the task token.
 
 File names for `/files/:name`: `video.mp4`, `video.srt`, `video.vtt`, `storyboard.json`, `original`
 (the upload, served with its original file name in `content-disposition`). Anything else is 404.
@@ -39,7 +46,7 @@ File names for `/files/:name`: `video.mp4`, `video.srt`, `video.vtt`, `storyboar
   "status": "queued | running | done | failed | cancelled",
   "stage": "extract | storyboard | narrate | timing | music | scenes | assemble | revise | null",
   "minutes": 5,
-  "agent": "sdk | channel",
+  "agent": "sdk | channel | session",
   "created": "2026-10-08T22:10:00Z",
   "updated": "2026-10-08T22:31:12Z",
   "queuePosition": null,
@@ -74,11 +81,11 @@ Every event has `seq` (1, 2, 3 …), `ts` (ISO time) and `type`:
 | `user` | `text`, `file` (upload name, first message only) | the owner's prompt or follow-up |
 | `stage` | `stage`, `state`: `start`, `done`, `failed`, `skipped`; `detail` | pipeline stage changed |
 | `progress` | `stage`, `done`, `total` | for `scenes`: scenes finished out of total |
-| `say` | `msg`, `role`: `storyboard` or `revise`, `delta` | assistant chat text; append `delta` to the bubble with id `msg` |
-| `activity` | `role`: `storyboard`, `scene`, `revise`; `scene`; `text` | one-line summary of a tool call, e.g. `s02 · Edit web/scenes/s02.js` |
+| `say` | `msg`, `role`: `video`, `storyboard` or `revise`, `delta` | assistant chat text; append `delta` to the bubble with id `msg` |
+| `activity` | `role`: `video`, `storyboard`, `scene`, `revise`; `scene`; `text` | one-line summary of a tool call, e.g. `s02 · Edit web/scenes/s02.js` |
 | `log` | `stage`, `text` | a line of pipeline script output (throttled) |
 | `file` | `name`, `size`, `url` | an output file is ready; `url` is relative to the job, e.g. `files/video.mp4` |
 | `error` | `stage`, `message`, `detail` | something failed; the job may still continue (e.g. a scene fell back). `message` is one plain sentence for the page; `detail` (optional) holds the command output or traceback |
 | `done` | `durationSeconds` | the video is finished |
 
-Only `storyboard` and `revise` agents produce `say` events; scene agents only produce `activity`.
+`video`, `storyboard` and `revise` agents produce `say` events; scene agents only produce `activity`.
