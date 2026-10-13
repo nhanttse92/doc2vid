@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { cp, mkdir, readFile, readdir, realpath, rename, rm, stat, symlink, writeFile, appendFile, copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { runCommand } from './commands.mjs';
@@ -7,7 +7,7 @@ import { runChannelAgent } from './channel-runner.mjs';
 import { readDotenv } from './config.mjs';
 
 const stages = ['extract', 'storyboard', 'narrate', 'timing', 'scenes', 'music', 'assemble', 'revise'];
-const allowedExt = new Set(['.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', '.md']);
+const allowedExt = new Set(['.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', '.md', '.png']);
 const outputPaths = { 'video.mp4': 'out/video.mp4', 'video.srt': 'out/video.srt', 'storyboard.json': 'storyboard.json' };
 const iso = () => new Date().toISOString();
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -24,11 +24,12 @@ export function brief(text) {
 
 export function validateUpload(name, data) {
   const ext = path.extname(name).toLowerCase();
-  if (!allowedExt.has(ext)) throw Object.assign(new Error('Use a PDF, Word, RTF, ODT, TXT or MD file.'), { code: 'bad_file' });
+  if (!allowedExt.has(ext)) throw Object.assign(new Error('Use a PDF, Word, RTF, ODT, TXT, MD or PNG file.'), { code: 'bad_file' });
   const magic = ext === '.pdf' ? data.subarray(0, 4).toString() === '%PDF'
     : ['.docx', '.odt'].includes(ext) ? data.subarray(0, 2).toString() === 'PK'
     : ext === '.doc' ? data.subarray(0, 4).equals(Buffer.from([0xd0, 0xcf, 0x11, 0xe0]))
-    : ext === '.rtf' ? data.subarray(0, 5).toString() === '{\\rtf' : true;
+    : ext === '.rtf' ? data.subarray(0, 5).toString() === '{\\rtf'
+    : ext === '.png' ? data.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) : true;
   if (!magic) throw Object.assign(new Error('The file content does not match its extension.'), { code: 'bad_file' });
   return ext;
 }
@@ -36,7 +37,7 @@ export function validateUpload(name, data) {
 function summary(job) {
   return {
     id: job.id, title: job.title, status: job.status, stage: job.stage,
-    minutes: job.minutes, agent: job.agent || 'sdk', created: job.created, updated: job.updated,
+    minutes: job.minutes, agent: job.agent || 'session', created: job.created, updated: job.updated,
     queuePosition: job.queuePosition ?? null, inputName: job.input.name,
     hasVideo: job.hasVideo || false, durationSeconds: job.durationSeconds ?? null,
   };
@@ -72,6 +73,7 @@ export class JobService {
     this.listeners = new Map();
     this.openrouterKey = null;
     this.lastLogByStage = new Map();
+    this.activeTask = null;
   }
 
   async init() {
@@ -198,7 +200,7 @@ export class JobService {
 
   redact(value) {
     let text = String(value || 'Unknown failure');
-    for (const secret of [this.config.originKey, this.openrouterKey, this.config.env.ANTHROPIC_API_KEY].filter(Boolean)) text = text.replaceAll(secret, '[redacted]');
+    for (const secret of [this.config.originKey, this.openrouterKey, this.config.env.ANTHROPIC_API_KEY, this.activeTask?.token].filter(Boolean)) text = text.replaceAll(secret, '[redacted]');
     return text;
   }
 
@@ -207,8 +209,8 @@ export class JobService {
     const ext = validateUpload(name, data);
     if (data.length > this.config.maxUploadBytes) throw Object.assign(new Error('File exceeds the upload limit.'), { code: 'too_large' });
     if (![2, 5, 10, 20].includes(Number(minutes)) || !/^\d+$/.test(String(minutes))) throw Object.assign(new Error('Minutes must be 2, 5, 10 or 20.'), { code: 'bad_minutes' });
-    agent = agent || this.config.agentTransport || 'sdk';
-    if (!['sdk', 'channel'].includes(agent)) throw Object.assign(new Error('Agent must be sdk or channel.'), { code: 'bad_agent' });
+    agent = agent || this.config.agentTransport || 'session';
+    if (!['sdk', 'channel', 'session'].includes(agent)) throw Object.assign(new Error('Agent must be sdk, channel or session.'), { code: 'bad_agent' });
     if (typeof prompt !== 'string' || prompt.length > 4000 || typeof title !== 'undefined' && (typeof title !== 'string' || title.length > 120)) throw Object.assign(new Error('Prompt or title is too long.'), { code: 'bad_request' });
     let id, dir;
     do {
@@ -348,9 +350,9 @@ export class JobService {
     return content.replace(/\{\{([a-z_]+)\}\}/g, (match, key) => key in vars ? String(vars[key]) : match);
   }
 
-  async agent(job, role, prompt, signal, { scene, resume } = {}) {
+  async agent(job, role, prompt, signal, { scene, resume, timeoutMs, stepToken } = {}) {
     throwIfAborted(signal);
-    const secrets = [this.config.originKey, this.openrouterKey, this.config.env.ANTHROPIC_API_KEY].filter(Boolean);
+    const secrets = [this.config.originKey, this.openrouterKey, this.config.env.ANTHROPIC_API_KEY, this.activeTask?.token].filter(Boolean);
     const hold = Math.max(0, ...secrets.map(secret => secret.length - 1));
     const pendingSay = new Map();
     const flushSay = msg => {
@@ -371,8 +373,8 @@ export class JobService {
     };
     let result;
     try {
-      const runner = job.agent === 'channel' ? this.channelRunner : this.agentRunner;
-      result = await runner({ role, scene, cwd: job.dir, prompt, model: role === 'scene' ? this.config.sceneModel : this.config.storyboardModel, resume, timeoutMs: role === 'scene' ? 2_400_000 : 1_800_000, signal, config: this.config, onEvent });
+      const runner = ['channel', 'session'].includes(job.agent) ? this.channelRunner : this.agentRunner;
+      result = await runner({ role, scene, cwd: job.dir, prompt, model: role === 'scene' ? this.config.sceneModel : this.config.storyboardModel, resume, timeoutMs: timeoutMs ?? (role === 'scene' ? 2_400_000 : 1_800_000), signal, config: this.config, onEvent, ...(stepToken ? { jobId: job.id, stepToken } : {}) });
     } finally {
       for (const msg of pendingSay.keys()) flushSay(msg);
     }
@@ -400,6 +402,34 @@ export class JobService {
       const found = (await readdir(pages)).filter(name => name.endsWith('.png')).sort();
       for (let i = 0; i < found.length; i++) await rename(path.join(pages, found[i]), path.join(pages, `page-${String(i + 1).padStart(3, '0')}.png`));
       job.hasPages = found.length > 0;
+    } else if (ext === '.png') {
+      const pages = path.join(job.dir, 'source/pages');
+      await rm(pages, { recursive: true, force: true });
+      await mkdir(pages, { recursive: true });
+      await writeFile(text, '');
+      const ffprobe = await this.binary('ffprobe');
+      const ffmpeg = await this.binary('ffmpeg');
+      const result = await this.cmd(job, 'extract', ffprobe, ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=s=x:p=0', input], signal);
+      const size = result.lines.find(line => /^\d+x\d+$/.test(line.trim()));
+      if (!size) throw new Error('Could not read PNG dimensions.');
+      const [width, height] = size.trim().split('x').map(Number);
+      const tall = height > width * 1.6;
+      // Claude's image reader shrinks a long image until its text is unreadable.
+      const tileHeight = tall ? Math.min(height, Math.max(65, Math.round(width * 1.3), Math.ceil((height + 59 * 64) / 60))) : height;
+      const positions = [0];
+      if (tall) while (positions.at(-1) + tileHeight < height) {
+        positions.push(Math.min(positions.at(-1) + tileHeight - 64, height - tileHeight));
+        if (positions.length > 60) throw new Error('PNG needs more than 60 page tiles.');
+      }
+      for (let i = 0; i < positions.length; i++) {
+        const cropHeight = tall ? tileHeight : height;
+        const ratio = Math.min(1, 1568 / (tall ? width : Math.max(width, height)));
+        const scaledWidth = Math.max(1, Math.round(width * ratio));
+        const scaledHeight = Math.max(1, Math.round(cropHeight * ratio));
+        const filter = `${tall ? `crop=${width}:${cropHeight}:0:${positions[i]},` : ''}scale=${scaledWidth}:${scaledHeight}`;
+        await this.cmd(job, 'extract', ffmpeg, ['-v', 'error', '-y', '-i', input, '-vf', filter, '-frames:v', '1', path.join(pages, `page-${String(i + 1).padStart(3, '0')}.png`)], signal);
+      }
+      job.hasPages = true;
     } else if (['.txt', '.md'].includes(ext)) {
       await copyFile(input, text);
     } else {
@@ -415,7 +445,8 @@ export class JobService {
     for (const dir of search) {
       try { await stat(path.join(dir, name)); return path.join(dir, name); } catch { /* Keep searching. */ }
     }
-    throw new Error(`${name} is required; install poppler with brew install poppler.`);
+    const packageName = name.startsWith('pdf') ? 'poppler' : 'ffmpeg';
+    throw new Error(`${name} is required; install ${packageName} with brew install ${packageName}.`);
   }
 
   async validateStoryboard(job, signal, role = 'storyboard', sessionId) {
@@ -499,6 +530,168 @@ export class JobService {
     return true;
   }
 
+  async startMusic(job, signal) {
+    const item = job.stages.find(stage => stage.name === 'music');
+    item.state = 'running'; item.started = iso(); item.finished = null;
+    await this.persist(job);
+    await this.emit(job, { type: 'stage', stage: 'music', state: 'start' });
+    try {
+      await this.cmd(job, 'music', 'python3', ['music.py'], signal, { openrouter: true });
+      item.state = 'done';
+      await this.emit(job, { type: 'stage', stage: 'music', state: 'done' });
+    } catch (error) {
+      if (!signal.aborted) {
+        item.state = 'failed';
+        const reason = brief(this.redact(error.message));
+        await this.emit(job, { type: 'error', stage: 'music', message: `Background music could not be made (${reason}), so the video has no music where that track was planned.`, detail: this.redact(error.message).slice(-4000) });
+        await this.emit(job, { type: 'stage', stage: 'music', state: 'failed', detail: reason });
+      } else {
+        item.state = 'skipped';
+        if (!this.controller?.signal.aborted) await this.emit(job, { type: 'stage', stage: 'music', state: 'skipped', detail: 'Scenes failed' });
+      }
+    } finally { item.finished = iso(); await this.persist(job); }
+  }
+
+  goodStepToken(jobId, token) {
+    const task = this.activeTask;
+    if (!task || task.jobId !== jobId || typeof token !== 'string') return false;
+    const given = Buffer.from(token), expected = Buffer.from(task.token);
+    return given.length === expected.length && timingSafeEqual(given, expected);
+  }
+
+  async session(job, signal, role) {
+    if (role === 'video') {
+      const item = job.stages.find(stage => stage.name === 'storyboard');
+      item.state = 'running'; item.started = iso(); item.finished = null; job.stage = 'storyboard';
+      await this.persist(job);
+      await this.emit(job, { type: 'stage', stage: 'storyboard', state: 'start' });
+    }
+    const seconds = job.minutes * 60;
+    const prompt = role === 'video' ? await this.prompt(job, 'video.md', {
+      title: job.title, minutes: job.minutes, target_seconds: seconds,
+      word_budget: Math.round(seconds * 163 / 60 * 0.92),
+      scene_count: Math.max(2, Math.min(10, Math.round(job.minutes / 2.2))),
+      user_prompt: `${job.prompt}${job.recoveryMessage ? `\n${job.recoveryMessage}` : ''}`,
+      has_pages: job.hasPages ? 'yes' : 'no', input_name: job.input.name,
+    }) : await this.prompt(job, 'revise-session.md', { title: job.title, user_message: job.revisionMessage });
+    const task = { jobId: job.id, token: randomBytes(24).toString('hex'), assembled: false, music: null, signal, lock: Promise.resolve(), renderGate: new Semaphore(this.config.renderJobs), pending: new Set() };
+    this.activeTask = task;
+    let result;
+    try {
+      result = await this.agent(job, role, prompt, signal, { timeoutMs: (role === 'video' ? 40 + 20 * job.minutes : 60 + 10 * job.minutes) * 60_000, stepToken: task.token });
+      result = { ...result, text: result.text ? this.redact(result.text) : '', error: result.error ? this.redact(result.error) : '' };
+    } catch (error) {
+      error.message = this.redact(error.message);
+      throw error;
+    } finally {
+      await Promise.allSettled([...task.pending]);
+      this.activeTask = null;
+      if (task.music) await task.music;
+    }
+    const failure = result.isError ? result.error || 'Claude could not finish the task.'
+      : !task.assembled && role === 'video' ? `Claude finished without assembling the video.${result.text ? ` ${brief(result.text)}` : ''}` : null;
+    if (failure) {
+      const stage = job.stages.find(item => item.name === job.stage);
+      if (stage?.state === 'running') {
+        stage.state = 'failed'; stage.finished = iso();
+        await this.persist(job);
+        await this.emit(job, { type: 'stage', stage: stage.name, state: 'failed', detail: failure });
+      }
+      throw new Error(failure);
+    }
+    return task.assembled;
+  }
+
+  async step(jobId, token, { name, scene } = {}) {
+    if (!this.goodStepToken(jobId, token)) throw Object.assign(new Error('An active task token is required.'), { code: 'unauthorized' });
+    const task = this.activeTask, job = this.jobs.get(jobId), signal = task.signal;
+    const locked = fn => {
+      const work = task.lock.then(fn);
+      task.lock = work.catch(() => {});
+      return work;
+    };
+    const work = (async () => {
+      try {
+        throwIfAborted(signal);
+        if (name === 'narrate') return await locked(async () => {
+          await this.cmd(job, 'storyboard', 'node', ['tools/validate-storyboard.mjs'], signal);
+          const board = await this.loadScenes(job);
+          const storyboardStage = job.stages.find(stage => stage.name === 'storyboard');
+          if (storyboardStage.state === 'running') {
+            storyboardStage.state = 'done'; storyboardStage.finished = iso();
+            await this.persist(job);
+            await this.emit(job, { type: 'stage', stage: 'storyboard', state: 'done' });
+          }
+          await this.stage(job, 'narrate', () => this.cmd(job, 'narrate', 'python3', ['narrate.py'], signal, { openrouter: true }), signal);
+          await this.stage(job, 'timing', () => this.cmd(job, 'timing', 'python3', ['timing.py'], signal), signal);
+          const timing = JSON.parse(await readFile(path.join(job.dir, 'build/timing.json'), 'utf8'));
+          const briefs = path.join(job.dir, 'build/briefs');
+          await mkdir(briefs, { recursive: true });
+          const lines = [];
+          for (const item of board.scenes) {
+            const timed = timing.scenes?.find(entry => entry.id === item.id);
+            const file = path.join(briefs, `${item.id}.md`);
+            await writeFile(file, await this.prompt(job, 'scene.md', { scene_id: item.id, scene_title: item.title || item.id, beat_ids: item.beats?.map(beat => beat.id).join(',') || '', scene_seconds: timed?.duration ?? '' }));
+            lines.push(`${item.id}: ${timed?.duration ?? '?'} seconds — ${file}`);
+          }
+          for (const item of job.scenes) item.state = 'pending';
+          const stage = job.stages.find(item => item.name === 'scenes');
+          stage.state = 'running'; stage.started = iso(); stage.finished = null; job.stage = 'scenes';
+          await this.persist(job);
+          await this.emit(job, { type: 'stage', stage: 'scenes', state: 'start' });
+          return { ok: true, text: `Narration recorded; total ${timing.total ?? timing.durationSeconds ?? '?'} seconds. Scene briefs:\n${lines.join('\n')}` };
+        });
+        if (name === 'music') {
+          if (!await readFile(path.join(job.dir, 'build/timing.json')).then(() => true, error => error.code === 'ENOENT' ? false : Promise.reject(error))) return { ok: false, text: 'Call narrate first.' };
+          if (task.music) return { ok: true, text: 'Music is already running or finished.' };
+          task.music = this.startMusic(job, signal);
+          return { ok: true, text: 'Music started; assemble waits for it.' };
+        }
+        if (name === 'render') {
+          const item = job.scenes.find(entry => entry.id === scene);
+          if (!item) return { ok: false, text: 'Choose a scene id from the storyboard.' };
+          item.state = 'rendering'; await this.persist(job);
+          try {
+            await this.cmd(job, 'scenes', 'node', ['nancheck.mjs', scene], signal);
+            await task.renderGate.use(() => this.cmd(job, 'scenes', 'node', ['render.mjs', scene], signal, { jobs: 1 }));
+            item.state = 'done'; await this.persist(job);
+            const done = job.scenes.filter(entry => entry.state === 'done').length;
+            await this.emit(job, { type: 'progress', stage: 'scenes', done, total: job.scenes.length });
+            const stage = job.stages.find(entry => entry.name === 'scenes');
+            if (done === job.scenes.length && stage.state === 'running') {
+              stage.state = 'done'; stage.finished = iso(); await this.persist(job);
+              await this.emit(job, { type: 'stage', stage: 'scenes', state: 'done' });
+            }
+            return { ok: true, text: `Scene ${scene} rendered (${done}/${job.scenes.length}).` };
+          } catch (error) {
+            item.state = 'pending'; await this.persist(job);
+            throw error;
+          }
+        }
+        if (name === 'assemble') return await locked(async () => {
+          if (!task.music) task.music = this.startMusic(job, signal);
+          await task.music;
+          await this.stage(job, 'assemble', () => this.assemble(job, signal), signal);
+          const stage = job.stages.find(entry => entry.name === 'scenes');
+          if (stage.state === 'running') {
+            stage.state = 'done'; stage.finished = iso(); await this.persist(job);
+            await this.emit(job, { type: 'stage', stage: 'scenes', state: 'done' });
+          }
+          task.assembled = true;
+          return { ok: true, text: `Video assembled (${job.durationSeconds} seconds).` };
+        });
+        return { ok: false, text: 'Unknown step name.' };
+      } catch (error) {
+        return { ok: false, text: this.redact(error.message).split('\n').slice(-40).join('\n').slice(-4000) };
+      }
+    })();
+    task.pending.add(work);
+    try {
+      const result = await work;
+      return { ok: result.ok, text: this.redact(result.text).slice(0, 4000) };
+    } finally { task.pending.delete(work); }
+  }
+
   async scenesMusic(job, signal, { revision = false } = {}) {
     throwIfAborted(signal);
     const phaseController = new AbortController();
@@ -507,34 +700,15 @@ export class JobService {
     const phaseSignal = phaseController.signal;
     job.stage = 'scenes';
     const sceneStage = job.stages.find(s => s.name === 'scenes');
-    const musicStage = job.stages.find(s => s.name === 'music');
     sceneStage.state = 'running'; sceneStage.started = iso(); sceneStage.finished = null;
-    musicStage.state = 'running'; musicStage.started = iso(); musicStage.finished = null;
     try {
       await this.persist(job);
       await this.emit(job, { type: 'stage', stage: 'scenes', state: 'start' });
-      await this.emit(job, { type: 'stage', stage: 'music', state: 'start' });
     } catch (error) {
       signal.removeEventListener('abort', onAbort);
       throw error;
     }
-    const music = (async () => {
-      try {
-        await this.cmd(job, 'music', 'python3', ['music.py'], phaseSignal, { openrouter: true });
-        musicStage.state = 'done';
-        await this.emit(job, { type: 'stage', stage: 'music', state: 'done' });
-      } catch (error) {
-        if (!phaseSignal.aborted) {
-          musicStage.state = 'failed';
-          const reason = brief(this.redact(error.message));
-          await this.emit(job, { type: 'error', stage: 'music', message: `Background music could not be made (${reason}), so the video has no music where that track was planned.`, detail: this.redact(error.message).slice(-4000) });
-          await this.emit(job, { type: 'stage', stage: 'music', state: 'failed', detail: reason });
-        } else {
-          musicStage.state = 'skipped';
-          if (!signal.aborted) await this.emit(job, { type: 'stage', stage: 'music', state: 'skipped', detail: 'Scenes failed' });
-        }
-      } finally { musicStage.finished = iso(); await this.persist(job); }
-    })();
+    const music = this.startMusic(job, phaseSignal);
     try {
       const board = await this.loadScenes(job);
       const timing = JSON.parse(await readFile(path.join(job.dir, 'build/timing.json'), 'utf8'));
@@ -647,6 +821,22 @@ export class JobService {
 
   async execute(job, signal) {
     const resumeStage = job.stage;
+    if (job.agent === 'session') {
+      if (job.runKind === 'revision') {
+        if (!(await fileInfo(job, 'storyboard.json'))) {
+          job.recoveryMessage = job.revisionMessage;
+          job.runKind = 'initial';
+          await this.persist(job);
+        } else {
+          const assembled = await this.stage(job, 'revise', () => this.session(job, signal, 'revise'), signal);
+          if (!assembled) { job.status = job.previousStatus; job.stage = null; await this.persist(job); }
+          return;
+        }
+      }
+      if (job.stages.find(stage => stage.name === 'extract').state !== 'done') await this.stage(job, 'extract', () => this.extract(job, signal), signal);
+      await this.session(job, signal, 'video');
+      return;
+    }
     if (job.runKind === 'revision') {
       if (resumeStage === 'revise' && !(await fileInfo(job, 'storyboard.json'))) {
         job.recoveryMessage = job.revisionMessage;

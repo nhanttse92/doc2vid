@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
+import http from 'node:http';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { runChannelAgent } from '../src/channel-runner.mjs';
@@ -10,7 +11,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 // Plays the part of the interactive Claude Code session: it receives channel notifications and
 // answers each task by calling the channel's say and finish tools.
-async function startChannel(t, answer) {
+async function startChannel(t, answer, extraEnv = {}) {
   const port = 20000 + Math.floor(Math.random() * 20000);
   const client = new Client({ name: 'fake-session', version: '1' });
   const delivered = [];
@@ -19,7 +20,7 @@ async function startChannel(t, answer) {
     delivered.push(notification.params);
     void answer(client, notification.params);
   };
-  const transport = new StdioClientTransport({ command: process.execPath, args: [channelScript], env: { ...process.env, ORIGIN_KEY: 'channel-key', CHANNEL_PORT: String(port) }, stderr: 'ignore' });
+  const transport = new StdioClientTransport({ command: process.execPath, args: [channelScript], env: { ...process.env, ORIGIN_KEY: 'channel-key', CHANNEL_PORT: String(port), ...extraEnv }, stderr: 'ignore' });
   await client.connect(transport);
   t.after(() => client.close());
   const url = `http://127.0.0.1:${port}`;
@@ -90,4 +91,52 @@ test('channel unavailable is reported, not thrown', async () => {
   const result = await runChannelAgent({ role: 'storyboard', cwd: '/tmp/job', prompt: 'x', timeoutMs: 2_000, config: { channelUrl: 'http://127.0.0.1:1', originKey: 'k' }, onEvent: () => {} });
   assert.equal(result.isError, true);
   assert.match(result.error, /channel is unavailable/);
+});
+
+test('step forwards the task key and token to the job service', async t => {
+  const received = [];
+  const stub = http.createServer(async (req, res) => {
+    let body = '';
+    for await (const chunk of req) body += chunk;
+    received.push({ path: req.url, key: req.headers['x-doc2vid-key'], token: req.headers['x-doc2vid-step'], body: JSON.parse(body) });
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, text: 'Narration recorded.' }));
+  });
+  await new Promise(resolve => stub.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => stub.close(resolve)));
+  let stepResult;
+  const ch = await startChannel(t, async (client, params) => {
+    stepResult = await client.callTool({ name: 'step', arguments: { task_id: params.meta.task_id, name: 'narrate' } });
+    await client.callTool({ name: 'finish', arguments: { task_id: params.meta.task_id, ok: true, text: 'Done.' } });
+  }, { SERVICE_URL: `http://127.0.0.1:${stub.address().port}` });
+  const result = await runChannelAgent({ role: 'video', cwd: '/tmp/job', prompt: 'Make a video', jobId: 'j_123', stepToken: 'private-token', timeoutMs: 10_000, config: ch.config, onEvent: () => {} });
+  assert.equal(result.isError, false);
+  assert.deepEqual(received, [{ path: '/jobs/j_123/steps', key: 'channel-key', token: 'private-token', body: { name: 'narrate' } }]);
+  assert.equal(stepResult.isError, false);
+  assert.equal(stepResult.content[0].text, 'Narration recorded.');
+  assert.equal(ch.delivered[0].meta.role, 'video');
+});
+
+test('cancelling the current task notifies the session and blocks its steps', async t => {
+  let deliver;
+  const started = new Promise(resolve => { deliver = resolve; });
+  let cancelled;
+  const notice = new Promise(resolve => { cancelled = resolve; });
+  const ch = await startChannel(t, async (client, params) => {
+    if (params.meta.role === 'cancel') {
+      const result = await client.callTool({ name: 'step', arguments: { task_id: params.meta.task_id, name: 'music' } });
+      cancelled({ params, result });
+      await client.callTool({ name: 'finish', arguments: { task_id: params.meta.task_id, ok: false, text: 'Stopped.' } });
+    } else deliver(params);
+  });
+  const controller = new AbortController();
+  const running = runChannelAgent({ role: 'video', cwd: '/tmp/job', prompt: 'Make a video', jobId: 'j_123', stepToken: 'private-token', timeoutMs: 10_000, signal: controller.signal, config: ch.config, onEvent: () => {} });
+  await started;
+  controller.abort();
+  assert.equal((await running).error, 'Cancelled');
+  const { params, result } = await notice;
+  assert.equal(params.meta.role, 'cancel');
+  assert.match(params.content, /cancelled by the owner/);
+  assert.equal(result.isError, true);
+  assert.match(result.content[0].text, /This task was cancelled/);
 });

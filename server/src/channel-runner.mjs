@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 // Runs one agent task through the doc2vid channel (src/channel.mjs) instead of the Agent SDK. The
 // channel feeds tasks to a single long-lived interactive Claude Code session, so there is no
 // per-task session to resume: follow-up prompts land in the same conversation anyway.
-export async function runChannelAgent({ role, scene, cwd, prompt, timeoutMs, signal, onEvent, config }) {
+export async function runChannelAgent({ role, scene, cwd, prompt, timeoutMs, signal, onEvent, config, jobId, stepToken }) {
   const taskId = `t_${Date.now().toString(36)}_${randomBytes(3).toString('hex')}`;
   const controller = new AbortController();
   const onAbort = () => controller.abort(signal.reason);
@@ -15,7 +15,7 @@ export async function runChannelAgent({ role, scene, cwd, prompt, timeoutMs, sig
   try {
     const response = await fetch(`${config.channelUrl}/tasks`, {
       method: 'POST', headers, signal: controller.signal,
-      body: JSON.stringify({ task_id: taskId, role, scene, cwd, prompt }),
+      body: JSON.stringify({ task_id: taskId, role, scene, cwd, prompt, ...(jobId ? { job_id: jobId } : {}), ...(stepToken ? { step_token: stepToken } : {}), ...(timeoutMs ? { timeout_ms: timeoutMs } : {}) }),
     });
     if (!response.ok) return { sessionId: 'channel', text: '', isError: true, error: `The channel refused the task (HTTP ${response.status}).` };
     const decoder = new TextDecoder();

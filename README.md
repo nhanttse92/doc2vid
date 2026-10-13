@@ -1,6 +1,6 @@
 # doc2vid
 
-Turns an uploaded training document (.pdf, .doc, .docx) into a narrated, animated training video.
+Turns an uploaded training document or PNG image into a narrated, animated training video.
 A Node service on the Mac mini runs the pipeline and Claude Code sessions; the page lives at
 albinilabs.com/doc2vid (Cloudflare Worker in the albini-lab repo) and reaches the Mac mini through a
 Cloudflare Tunnel.
@@ -15,9 +15,11 @@ Cloudflare Tunnel.
 ## Template
 
 Copy `template/` once per job and symlink its `node_modules` into the copy. Add `job.json`,
-`source/text.txt` (plus the original upload and optional page images), then have the storyboard
-agent write `storyboard.json` using `template/prompts/storyboard.md`. Validate it with
-`node tools/validate-storyboard.mjs`. The director runs `python3 narrate.py`, `python3 timing.py`,
+`source/text.txt` (plus the original upload and optional page images). The default `session` mode
+hands the whole job to the always-on Claude session with `template/prompts/video.md`; the session
+calls server steps for narration, music, full renders and assembly. The `sdk` and `channel` modes
+keep the fixed pipeline, starting with `template/prompts/storyboard.md`. The pipeline validates
+with `node tools/validate-storyboard.mjs` and runs `python3 narrate.py`, `python3 timing.py`,
 `python3 music.py`, scene agents or `node tools/fallback-scene.mjs <id>`, `node nancheck.mjs <id>`,
 `node render.mjs <id...>`, and `python3 assemble.py --name video --clean`. Set
 `DOC2VID_OFFLINE=1` for silent, network-free narration and music tests. See

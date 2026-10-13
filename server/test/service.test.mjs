@@ -1,12 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { createServer } from '../src/server.mjs';
 import { fakeAgent } from '../src/agent.mjs';
 import { loadConfig } from '../src/config.mjs';
+import { runCommand } from '../src/commands.mjs';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -15,12 +17,13 @@ async function setup(t, options = {}) {
   const template = path.join(root, 'template');
   await mkdir(path.join(template, 'prompts'), { recursive: true });
   await mkdir(path.join(template, 'node_modules'));
-  for (const name of ['storyboard', 'repair-storyboard', 'scene', 'repair-scene', 'revise']) await writeFile(path.join(template, 'prompts', `${name}.md`), `${name} {{scene_id}} {{user_message}} {{errors}}`);
+  for (const name of ['storyboard', 'repair-storyboard', 'scene', 'repair-scene', 'revise', 'video', 'revise-session']) await writeFile(path.join(template, 'prompts', `${name}.md`), `${name} {{scene_id}} {{user_message}} {{errors}}`);
   const calls = [], agentCalls = [];
   let blockResolve;
   const block = new Promise(resolve => { blockResolve = resolve; });
   let failNancheck = options.failNancheck || false;
   const commandRunner = async ({ cmd, args, cwd, signal, onLine, env }) => {
+    if (options.realImageTools && ['ffmpeg', 'ffprobe'].includes(path.basename(cmd))) return runCommand({ cmd, args, cwd, signal, onLine, env });
     const name = path.basename(args[0] || cmd);
     calls.push({ name, args, env });
     onLine?.(`${name} progress`);
@@ -77,9 +80,9 @@ async function setup(t, options = {}) {
   let channelActive = 0, channelPeak = 0;
   // Stands in for the channel transport: records calls and how many ran at once.
   const channelRunner = async args => {
-    channelCalls.push({ role: args.role, scene: args.scene });
+    channelCalls.push({ role: args.role, scene: args.scene, jobId: args.jobId, stepToken: args.stepToken, timeoutMs: args.timeoutMs });
     channelPeak = Math.max(channelPeak, ++channelActive);
-    try { await sleep(20); return await agentRunner(args); } finally { channelActive--; }
+    try { return options.sessionRunner ? await options.sessionRunner(args, app.service) : (await sleep(20), await agentRunner(args)); } finally { channelActive--; }
   };
   const app = await createServer(config, { commandRunner, agentRunner, channelRunner });
   await app.listen();
@@ -101,11 +104,11 @@ async function setup(t, options = {}) {
     }
     throw new Error(`Timed out waiting for ${target}`);
   };
-  return { root, template, calls, agentCalls, channelCalls, channelPeak: () => channelPeak, app, config, base, request, upload, waitStatus, unblock: blockResolve };
+  return { root, template, calls, agentCalls, channelCalls, channelPeak: () => channelPeak, app, config, commandRunner, base, request, upload, waitStatus, unblock: blockResolve };
 }
 
-async function createId(env, ...args) {
-  const response = await env.upload(...args);
+async function createId(env, name = 'guide.txt', content = 'Training guide', fields = {}) {
+  const response = await env.upload(name, content, { agent: 'sdk', ...fields });
   const body = await response.json();
   assert.equal(response.status, 201, JSON.stringify(body));
   return body.job.id;
@@ -124,8 +127,31 @@ test('API validation and public health', async t => {
   assert.equal((await e.request('/jobs', { headers: { 'x-doc2vid-key': 'wrong' } })).status, 401);
   assert.equal((await e.upload('bad.exe')).status, 400);
   assert.equal((await e.upload('bad.pdf', 'not PDF')).status, 400);
+  const png = await e.upload('bad.png', 'not PNG');
+  assert.equal(png.status, 400);
+  assert.equal((await png.json()).error, 'bad_file');
   assert.equal((await e.upload('guide.txt', 'x'.repeat(100))).status, 413);
   assert.equal((await e.upload('guide.txt', 'text', { minutes: '3' })).status, 400);
+});
+
+test('a tall PNG upload creates readable page tiles', async t => {
+  if (spawnSync('ffmpeg', ['-version']).status !== 0 || spawnSync('ffprobe', ['-version']).status !== 0) return t.skip('ffmpeg and ffprobe are required');
+  const e = await setup(t, { realImageTools: true, maxBytes: 500_000 });
+  const input = path.join(e.root, 'tall.png');
+  await runCommand({ cmd: 'ffmpeg', args: ['-v', 'error', '-f', 'lavfi', '-i', 'color=white:s=400x2000', '-frames:v', '1', input], cwd: e.root });
+  const response = await e.upload('tall.png', await readFile(input), { agent: 'sdk' });
+  assert.equal(response.status, 201);
+  const id = (await response.json()).job.id;
+  await e.waitStatus(id, 'done');
+  const dir = path.join(e.config.home, 'jobs', id);
+  assert.equal(await readFile(path.join(dir, 'source/text.txt'), 'utf8'), '');
+  const pages = (await readdir(path.join(dir, 'source/pages'))).sort();
+  assert.ok(pages.length > 1 && pages.length <= 60);
+  for (const page of pages) {
+    const result = await runCommand({ cmd: 'ffprobe', args: ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=s=x:p=0', path.join(dir, 'source/pages', page)], cwd: e.root });
+    const [width] = result.lines.at(-1).split('x').map(Number);
+    assert.ok(width <= 1568);
+  }
 });
 
 test('job lifecycle, ordered stages, events, files and ranges', async t => {
@@ -324,6 +350,7 @@ test('optional real-template offline integration', { skip: process.env.DOC2VID_I
   const form = new FormData();
   form.set('file', new Blob(['Train a worker to check every carton before packing.']), 'guide.txt');
   form.set('minutes', '2');
+  form.set('agent', 'sdk');
   const base = `http://127.0.0.1:${app.server.address().port}`;
   const response = await fetch(`${base}/jobs`, { method: 'POST', headers: { 'x-doc2vid-key': 'integration-key' }, body: form });
   assert.equal(response.status, 201);
@@ -348,6 +375,97 @@ test('a channel job sends its agent work through the channel runner, one scene a
   assert.equal(e.channelPeak(), 1);
   // Every agent call went through the channel runner (which delegates to the fake for its output).
   assert.equal(e.agentCalls.length - sdkCalls, e.channelCalls.length);
+});
+
+test('session mode makes a video through channel steps and rejects expired tokens', async t => {
+  let e;
+  e = await setup(t, { sessionRunner: async (args, service) => {
+    if (args.role === 'revise') return { sessionId: 'channel', text: 'The document already covers that.', isError: false };
+    assert.equal(args.role, 'video');
+    assert.ok(args.jobId && /^[0-9a-f]{48}$/.test(args.stepToken));
+    await writeFile(path.join(args.cwd, 'storyboard.json'), await readFile(new URL('./fixtures/storyboard.json', import.meta.url)));
+    await assert.rejects(service.step(args.jobId, 'wrong', { name: 'narrate' }), /active task token/);
+    const wrong = await e.request(`/jobs/${args.jobId}/steps`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-doc2vid-step': 'wrong' }, body: JSON.stringify({ name: 'narrate' }) });
+    assert.equal(wrong.status, 401);
+    assert.equal((await e.request(`/jobs/${args.jobId}/steps`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-doc2vid-step': args.stepToken }, body: '{}' })).status, 400);
+    const unknown = await e.request(`/jobs/${args.jobId}/steps`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-doc2vid-step': args.stepToken }, body: JSON.stringify({ name: 'unknown' }) });
+    assert.equal(unknown.status, 200);
+    assert.equal((await unknown.json()).ok, false);
+    for (const [name, scene] of [['narrate'], ['music'], ['render', 's01'], ['render', 's02'], ['assemble']]) {
+      const result = await service.step(args.jobId, args.stepToken, { name, scene });
+      assert.equal(result.ok, true, `${name}: ${result.text}`);
+    }
+    args.onEvent({ type: 'say', msg: 'video-1', role: 'video', delta: 'The video is ready.' });
+    args.onEvent({ type: '_say_end', msg: 'video-1' });
+    args.onEvent({ type: 'say', msg: 'leak', role: 'video', delta: args.stepToken.slice(0, 20) });
+    args.onEvent({ type: 'say', msg: 'leak', role: 'video', delta: args.stepToken.slice(20) });
+    args.onEvent({ type: '_say_end', msg: 'leak' });
+    return { sessionId: 'channel', text: 'Done.', isError: false };
+  } });
+  const response = await e.upload('guide.txt', 'Training guide');
+  assert.equal(response.status, 201);
+  const id = (await response.json()).job.id;
+  const detail = await e.waitStatus(id, 'done');
+  assert.equal(detail.agent, 'session');
+  assert.deepEqual(detail.scenes.map(scene => scene.state), ['done', 'done']);
+  const events = await log(e, id);
+  const starts = events.filter(event => event.type === 'stage' && event.state === 'start').map(event => event.stage);
+  assert.deepEqual(starts.slice(0, 4), ['extract', 'storyboard', 'narrate', 'timing']);
+  assert.ok(starts.includes('scenes') && starts.includes('music') && starts.at(-1) === 'assemble');
+  assert.deepEqual(events.filter(event => event.type === 'progress').map(event => event.done), [1, 2]);
+  assert.deepEqual(events.filter(event => event.type === 'file').map(event => event.name), ['video.mp4', 'video.srt', 'storyboard.json']);
+  assert.equal(events.filter(event => event.type === 'done').length, 1);
+  assert.ok(events.some(event => event.type === 'say' && event.role === 'video'));
+  assert.ok(e.channelCalls.some(call => call.role === 'video' && call.jobId === id && call.stepToken));
+  assert.ok(!(await readFile(path.join(e.config.home, 'jobs', id, 'events.ndjson'), 'utf8')).includes(e.channelCalls[0].stepToken));
+  await assert.rejects(e.app.service.step(id, e.channelCalls[0].stepToken, { name: 'music' }), /active task token/);
+  const expired = await e.request(`/jobs/${id}/steps`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-doc2vid-step': e.channelCalls[0].stepToken }, body: JSON.stringify({ name: 'music' }) });
+  assert.equal(expired.status, 401);
+  assert.equal((await e.request(`/jobs/${id}/steps`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })).status, 401);
+  const count = events.filter(event => event.type === 'done').length;
+  assert.equal((await e.request(`/jobs/${id}/messages`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: 'What does it cover?' }) })).status, 202);
+  const deadline = Date.now() + 4000;
+  while (Date.now() < deadline && !(e.channelCalls.some(call => call.role === 'revise') && e.app.service.get(id).status === 'done')) await sleep(20);
+  assert.ok(e.channelCalls.some(call => call.role === 'revise'));
+  assert.equal(e.app.service.get(id).status, 'done');
+  assert.equal((await log(e, id)).filter(event => event.type === 'done').length, count);
+});
+
+test('session mode fails when Claude finishes without assembly', async t => {
+  const e = await setup(t, { sessionRunner: async args => ({ sessionId: 'channel', text: `I stopped early. ${args.stepToken}`, isError: false }) });
+  const id = await createId(e, 'guide.txt', 'Training guide', { agent: 'session' });
+  await e.waitStatus(id, 'failed');
+  const events = await log(e, id);
+  assert.match(events.find(event => event.type === 'error').detail, /without assembling the video/);
+  assert.ok(events.some(event => event.type === 'stage' && event.stage === 'storyboard' && event.state === 'failed'));
+  assert.ok(!(await readFile(path.join(e.config.home, 'jobs', id, 'events.ndjson'), 'utf8')).includes(e.channelCalls[0].stepToken));
+});
+
+test('a restarted session job reuses extraction and receives a new video task', async t => {
+  const e = await setup(t, { sessionRunner: args => new Promise(resolve => {
+    if (args.signal.aborted) resolve({ isError: true, error: 'Cancelled' });
+    else args.signal.addEventListener('abort', () => resolve({ isError: true, error: 'Cancelled' }), { once: true });
+  }) });
+  const id = await createId(e, 'guide.txt', 'Training guide', { agent: 'session' });
+  await e.waitStatus(id, 'running');
+  while (!e.channelCalls.some(call => call.role === 'video')) await sleep(10);
+  await e.app.close();
+  let resumed;
+  resumed = await createServer(e.config, { commandRunner: e.commandRunner, channelRunner: async args => {
+    while (!resumed) await sleep(1);
+    await writeFile(path.join(args.cwd, 'storyboard.json'), await readFile(new URL('./fixtures/storyboard.json', import.meta.url)));
+    for (const [name, scene] of [['narrate'], ['render', 's01'], ['render', 's02'], ['assemble']]) {
+      const result = await resumed.service.step(args.jobId, args.stepToken, { name, scene });
+      assert.equal(result.ok, true, result.text);
+    }
+    return { sessionId: 'channel', text: 'Recovered.', isError: false };
+  } });
+  await resumed.listen();
+  t.after(() => resumed.close());
+  const deadline = Date.now() + 4000;
+  while (resumed.service.get(id).status !== 'done' && Date.now() < deadline) await sleep(20);
+  assert.equal(resumed.service.get(id).status, 'done');
+  assert.equal((await log(e, id)).filter(event => event.type === 'stage' && event.stage === 'extract' && event.state === 'start').length, 1);
 });
 
 test('warnings keep the last meaningful line of a traceback', async () => {

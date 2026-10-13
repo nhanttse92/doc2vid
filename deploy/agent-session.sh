@@ -6,7 +6,7 @@ set -u
 t() { /opt/homebrew/bin/tmux -L doc2vid "$@"; }
 if ! t has-session -t agent 2>/dev/null; then
   t new-session -d -s agent -x 200 -y 50 -c "$HOME/doc2vid/agent" \
-    "$HOME/.local/bin/claude --model ${AGENT_MODEL:-claude-opus-5-5} --setting-sources project --strict-mcp-config --mcp-config $HOME/.config/doc2vid/channel-mcp.json --dangerously-load-development-channels server:doc2vid --dangerously-skip-permissions --disallowedTools WebFetch WebSearch"
+    "export MCP_TOOL_TIMEOUT=3600000; $HOME/.local/bin/claude --model ${AGENT_MODEL:-claude-opus-5-5} --setting-sources project --strict-mcp-config --mcp-config $HOME/.config/doc2vid/channel-mcp.json --dangerously-load-development-channels server:doc2vid --dangerously-skip-permissions --disallowedTools WebFetch WebSearch"
   i=0
   while [ "$i" -lt 60 ]; do
     sleep 2; i=$((i + 1))
