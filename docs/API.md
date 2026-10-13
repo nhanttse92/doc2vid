@@ -78,7 +78,7 @@ Every event has `seq` (1, 2, 3 …), `ts` (ISO time) and `type`:
 | `activity` | `role`: `storyboard`, `scene`, `revise`; `scene`; `text` | one-line summary of a tool call, e.g. `s02 · Edit web/scenes/s02.js` |
 | `log` | `stage`, `text` | a line of pipeline script output (throttled) |
 | `file` | `name`, `size`, `url` | an output file is ready; `url` is relative to the job, e.g. `files/video.mp4` |
-| `error` | `stage`, `message` | something failed; the job may still continue (e.g. a scene fell back) |
+| `error` | `stage`, `message`, `detail` | something failed; the job may still continue (e.g. a scene fell back). `message` is one plain sentence for the page; `detail` (optional) holds the command output or traceback |
 | `done` | `durationSeconds` | the video is finished |
 
 Only `storyboard` and `revise` agents produce `say` events; scene agents only produce `activity`.

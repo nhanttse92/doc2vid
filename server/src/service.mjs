@@ -13,6 +13,14 @@ const iso = () => new Date().toISOString();
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const safeName = name => path.basename(String(name).replace(/[\r\n\x00-\x1f\x7f]/g, '_')).slice(0, 255) || 'document';
 const throwIfAborted = signal => { if (signal?.aborted) throw signal.reason || new Error('Cancelled'); };
+// The job page shows warnings as one sentence; command failures carry a traceback or log tail, so
+// keep their last meaningful line and send the rest as `detail`.
+export function brief(text) {
+  const lines = String(text || '').split('\n').map(line => line.trim())
+    .filter(line => line && !/^[~^\s]+$/.test(line) && !/^(File "|Traceback \(most recent call last\))/.test(line));
+  const last = (lines.at(-1) || 'Unknown error').replace(/^(?:[A-Za-z_.]+(?:Error|Exception)|Error):\s*/, '');
+  return last.length > 240 ? `${last.slice(0, 239)}…` : last;
+}
 
 export function validateUpload(name, data) {
   const ext = path.extname(name).toLowerCase();
@@ -176,7 +184,7 @@ export class JobService {
           continue;
         }
         if (job.status === 'failed') {
-          await this.emit(job, { type: 'error', stage: job.stage, message: this.redact(error.message) });
+          await this.emit(job, { type: 'error', stage: job.stage, message: brief(this.redact(error.message)), detail: this.redact(error.message).slice(-4000) });
         }
         await this.persist(job);
         await this.emit(job, { type: 'status', status: job.status, queuePosition: null });
@@ -518,8 +526,9 @@ export class JobService {
       } catch (error) {
         if (!phaseSignal.aborted) {
           musicStage.state = 'failed';
-          await this.emit(job, { type: 'error', stage: 'music', message: this.redact(error.message) });
-          await this.emit(job, { type: 'stage', stage: 'music', state: 'failed', detail: this.redact(error.message) });
+          const reason = brief(this.redact(error.message));
+          await this.emit(job, { type: 'error', stage: 'music', message: `Background music could not be made (${reason}), so the video has no music where that track was planned.`, detail: this.redact(error.message).slice(-4000) });
+          await this.emit(job, { type: 'stage', stage: 'music', state: 'failed', detail: reason });
         } else {
           musicStage.state = 'skipped';
           if (!signal.aborted) await this.emit(job, { type: 'stage', stage: 'music', state: 'skipped', detail: 'Scenes failed' });
@@ -586,7 +595,7 @@ export class JobService {
         } catch (error) {
           throwIfAborted(signal);
           lastError = error.message.split('\n').slice(-40).join('\n');
-          if (attempt < 2) await this.emit(job, { type: 'error', stage: 'scenes', message: `${scene.id}: ${this.redact(lastError)}` });
+          if (attempt < 2) await this.emit(job, { type: 'error', stage: 'scenes', message: `Scene ${scene.id} failed a check (${brief(this.redact(lastError))}); the agent is fixing it.`, detail: this.redact(lastError) });
         }
       }
     } else if (changed) {
@@ -605,11 +614,11 @@ export class JobService {
           return;
         } catch (error) {
           lastError = error.message.split('\n').slice(-40).join('\n');
-          if (attempt < 2) await this.emit(job, { type: 'error', stage: 'scenes', message: `${scene.id}: ${this.redact(lastError)}` });
+          if (attempt < 2) await this.emit(job, { type: 'error', stage: 'scenes', message: `Scene ${scene.id} failed a check (${brief(this.redact(lastError))}); the agent is fixing it.`, detail: this.redact(lastError) });
         }
       }
     }
-    await this.emit(job, { type: 'error', stage: 'scenes', message: `${scene.id}: ${this.redact(lastError || 'Scene failed')}; using fallback` });
+    await this.emit(job, { type: 'error', stage: 'scenes', message: `Scene ${scene.id} uses a simpler animation because the agent's version kept failing (${brief(this.redact(lastError || 'Scene failed'))}).`, detail: this.redact(lastError || '') });
     state.state = 'fallback'; await this.persist(job);
     try {
       await this.cmd(job, 'scenes', 'node', ['tools/fallback-scene.mjs', scene.id], signal);

@@ -116,3 +116,30 @@ test('warehouse example scene passes nancheck with its saved timing', { timeout:
     run(dir, 'node', ['nancheck.mjs', 's01']);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
+
+test('music reuses a matching bed, rebuilds on a new prompt, and fails in one readable line', { timeout: 180000 }, async () => {
+  const dir = await jobDir();
+  try {
+    await copyFile(path.join(examples, 'mini/storyboard.json'), path.join(dir, 'storyboard.json'));
+    const env = { ...process.env, DOC2VID_OFFLINE: '1' };
+    for (const cmd of [['python3', ['narrate.py']], ['python3', ['timing.py']]]) {
+      const r = spawnSync(cmd[0], cmd[1], { cwd: dir, env, encoding: 'utf8' });
+      assert.equal(r.status, 0, r.stderr);
+    }
+    const first = spawnSync('python3', ['music.py'], { cwd: dir, env, encoding: 'utf8' });
+    assert.equal(first.status, 0, first.stderr);
+    assert.match(first.stdout, /takes ->/);
+    const second = spawnSync('python3', ['music.py'], { cwd: dir, env, encoding: 'utf8' });
+    assert.equal(second.status, 0, second.stderr);
+    assert.match(second.stdout, /reusing the existing bed/);
+    const board = JSON.parse(await readFile(path.join(dir, 'storyboard.json'), 'utf8'));
+    board.music[0].prompt += ' With a slower tempo.';
+    await writeFile(path.join(dir, 'storyboard.json'), JSON.stringify(board));
+    const third = spawnSync('python3', ['music.py'], { cwd: dir, env, encoding: 'utf8' });
+    assert.equal(third.status, 0, third.stderr);
+    assert.match(third.stdout, /takes ->/);
+    const failing = spawnSync('python3', [path.join(dir, 'tests/music_retry_check.py'), dir], { cwd: dir, encoding: 'utf8' });
+    assert.equal(failing.status, 0, failing.stdout + failing.stderr);
+    assert.match(failing.stdout, /^ok: Music failed for m01: Lyria returned no audio \| attempts: 3$/m);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});

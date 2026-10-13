@@ -349,3 +349,11 @@ test('a channel job sends its agent work through the channel runner, one scene a
   // Every agent call went through the channel runner (which delegates to the fake for its output).
   assert.equal(e.agentCalls.length - sdkCalls, e.channelCalls.length);
 });
+
+test('warnings keep the last meaningful line of a traceback', async () => {
+  const { brief } = await import('../src/service.mjs');
+  const traceback = 'python3 music.py exited 1\nTraceback (most recent call last):\n  File "/x/music.py", line 86, in take\n    voice.compose(cue)\n    ~~~~~~~~~^^^^\nRuntimeError: Lyria returned no audio';
+  assert.equal(brief(traceback), 'Lyria returned no audio');
+  assert.equal(brief('python3 music.py exited 1\nMusic failed for m01: Lyria returned no audio'), 'Music failed for m01: Lyria returned no audio');
+  assert.ok(brief('x'.repeat(500)).length <= 240);
+});
