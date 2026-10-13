@@ -136,7 +136,23 @@ test('cancelling the current task notifies the session and blocks its steps', as
   assert.equal((await running).error, 'Cancelled');
   const { params, result } = await notice;
   assert.equal(params.meta.role, 'cancel');
-  assert.match(params.content, /cancelled by the owner/);
+  assert.match(params.content, /stopped by the job service/);
   assert.equal(result.isError, true);
-  assert.match(result.content[0].text, /This task was cancelled/);
+  assert.match(result.content[0].text, /This task was stopped by the job service/);
+});
+
+test('a quiet task stream gets keepalive lines that the runner ignores', async t => {
+  const ch = await startChannel(t, async (client, params) => {
+    await sleep(300);
+    await client.callTool({ name: 'finish', arguments: { task_id: params.meta.task_id, ok: true, text: 'done' } });
+  }, { CHANNEL_PING_MS: '50' });
+  const response = await fetch(`${ch.url}/tasks`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-doc2vid-key': 'channel-key' }, body: JSON.stringify({ task_id: 'quiet-raw', role: 'video', cwd: '/tmp/job', prompt: 'wait' }) });
+  const lines = (await response.text()).trim().split('\n').map(line => JSON.parse(line));
+  assert.ok(lines.filter(line => line.type === 'ping').length >= 2);
+  assert.equal(lines.at(-1).type, 'finish');
+  const events = [];
+  const result = await runChannelAgent({ role: 'video', cwd: '/tmp/job', prompt: 'wait', timeoutMs: 10_000, config: ch.config, onEvent: event => events.push(event) });
+  assert.equal(result.isError, false);
+  assert.deepEqual(events.filter(event => event.type === 'say').map(event => event.delta), ['done']);
+  assert.ok(events.every(event => ['say', '_say_end'].includes(event.type)));
 });
