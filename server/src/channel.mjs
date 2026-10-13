@@ -15,6 +15,9 @@ if (!key) throw new Error('ORIGIN_KEY is required (set it in ~/.config/doc2vid/s
 const port = Number(process.env.CHANNEL_PORT || 8792);
 // Backstop so a task the session never finishes cannot block the queue forever.
 const maxTaskMs = Number(process.env.CHANNEL_TASK_MS || 50 * 60_000);
+// Node's fetch drops a response body that stays silent for five minutes, and a whole-video task can
+// go longer than that between notes while scene subagents work, so open task streams get keepalives.
+const pingMs = Number(process.env.CHANNEL_PING_MS || 30_000);
 const serviceUrl = process.env.SERVICE_URL || `http://127.0.0.1:${process.env.PORT || 8790}`;
 
 const tasks = new Map();
@@ -63,16 +66,14 @@ mcp.setRequestHandler(CallToolRequestSchema, async request => {
   const task = tasks.get(String(args.task_id || ''));
   if (!task) return { content: [{ type: 'text', text: `No open task ${args.task_id}; it may have been cancelled.` }], isError: true };
   if (name === 'step') {
-    if (task.abandoned) return { content: [{ type: 'text', text: 'This task was cancelled; stop and call finish with ok false.' }], isError: true };
+    if (task.abandoned) return { content: [{ type: 'text', text: 'This task was stopped by the job service; stop and call finish with ok false.' }], isError: true };
     if (!task.jobId || !task.stepToken) return { content: [{ type: 'text', text: 'This task has no server steps.' }], isError: true };
     try {
-      const response = await fetch(`${serviceUrl}/jobs/${encodeURIComponent(task.jobId)}/steps`, {
-        method: 'POST', headers: { 'content-type': 'application/json', 'x-doc2vid-key': key, 'x-doc2vid-step': task.stepToken },
-        body: JSON.stringify({ name: args.name, ...(args.scene ? { scene: args.scene } : {}) }),
-      });
-      const body = await response.json();
-      if (task.abandoned) return { content: [{ type: 'text', text: 'This task was cancelled; stop and call finish with ok false.' }], isError: true };
-      return { content: [{ type: 'text', text: String(body.text || body.message || `Server step failed (HTTP ${response.status}).`).replaceAll(task.stepToken, '[redacted]') }], isError: !response.ok || body.ok !== true };
+      const response = await postJson(`${serviceUrl}/jobs/${encodeURIComponent(task.jobId)}/steps`, { 'x-doc2vid-key': key, 'x-doc2vid-step': task.stepToken },
+        JSON.stringify({ name: args.name, ...(args.scene ? { scene: args.scene } : {}) }));
+      const body = response.body;
+      if (task.abandoned) return { content: [{ type: 'text', text: 'This task was stopped by the job service; stop and call finish with ok false.' }], isError: true };
+      return { content: [{ type: 'text', text: String(body.text || body.message || `Server step failed (HTTP ${response.status}).`).replaceAll(task.stepToken, '[redacted]') }], isError: response.status !== 200 || body.ok !== true };
     } catch (error) {
       return { content: [{ type: 'text', text: `The job service is unavailable: ${error.message.replaceAll(task.stepToken, '[redacted]')}` }], isError: true };
     }
@@ -87,6 +88,22 @@ mcp.setRequestHandler(CallToolRequestSchema, async request => {
   }
   throw new Error(`unknown tool: ${name}`);
 });
+
+// node:http rather than fetch: fetch gives up on a response that takes over five minutes to start, and
+// narration, a long scene's render or assembly can take longer than that.
+function postJson(url, headers, body) {
+  return new Promise((resolve, reject) => {
+    const req = http.request(url, { method: 'POST', headers: { 'content-type': 'application/json', ...headers } }, res => {
+      let data = '';
+      res.setEncoding('utf8');
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => { try { resolve({ status: res.statusCode, body: JSON.parse(data) }); } catch (error) { reject(error); } });
+      res.on('error', reject);
+    });
+    req.on('error', reject);
+    req.end(body);
+  });
+}
 
 function send(task, event) {
   if (task.res && !task.res.writableEnded) task.res.write(`${JSON.stringify(event)}\n`);
@@ -116,7 +133,7 @@ async function deliverNext() {
   });
 }
 
-// The client went away (cancel or timeout in the job service). A queued task is dropped; the running
+// The client went away (cancel, timeout or a dropped connection in the job service). A queued task is dropped; the running
 // one keeps its slot until the session calls finish, because a turn in progress cannot be withdrawn.
 function abandon(task) {
   task.res = null;
@@ -124,7 +141,7 @@ function abandon(task) {
   if (index >= 0) { queue.splice(index, 1); tasks.delete(task.id); log(`dropped queued ${task.id}`); }
   else if (current === task && !task.abandoned) {
     task.abandoned = true;
-    void mcp.notification({ method: 'notifications/claude/channel', params: { content: `Task ${task.id} was cancelled by the owner. Stop working on it and call finish with ok false.`, meta: { task_id: task.id, role: 'cancel', scene: '', cwd: task.cwd } } }).catch(() => {});
+    void mcp.notification({ method: 'notifications/claude/channel', params: { content: `Task ${task.id} was stopped by the job service (cancelled, timed out or disconnected). Stop working on it and call finish with ok false.`, meta: { task_id: task.id, role: 'cancel', scene: '', cwd: task.cwd } } }).catch(() => {});
   }
 }
 
@@ -158,6 +175,8 @@ const server = http.createServer(async (req, res) => {
   res.on('close', () => { if (tasks.get(id) === task && task.res === res) abandon(task); });
   void deliverNext();
 });
+
+setInterval(() => { for (const task of tasks.values()) send(task, { type: 'ping' }); }, pingMs).unref();
 
 await mcp.connect(new StdioServerTransport());
 server.listen(port, '127.0.0.1', () => log(`listening on 127.0.0.1:${port}`));
